@@ -583,7 +583,7 @@ class EM_Bookings_Table{
 				$val = $csv ? $EM_Booking->booking_comment : esc_html($EM_Booking->booking_comment);
 			}
 			//escape all HTML if destination is HTML or not defined
-			if( $format == 'html' || empty($format) ){
+			if( $csv == 'html' || empty($csv) ){
 				if( !in_array($col, array('user_name', 'event_name', 'actions')) ) $val = esc_html($val);
 			}
 			//use this 
