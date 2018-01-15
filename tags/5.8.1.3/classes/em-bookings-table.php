@@ -450,13 +450,13 @@ class EM_Bookings_Table{
 									foreach($EM_Booking->get_tickets_bookings()->tickets_bookings as $EM_Ticket_Booking){
 										$row = $this->get_row($EM_Ticket_Booking);
 										foreach( $row as $row_cell ){
-										?><td><?php echo esc_html($row_cell); ?></td><?php
+										?><td><?php echo $row_cell; ?></td><?php
 										}
 									}
 								}else{
 									$row = $this->get_row($EM_Booking);
 									foreach( $row as $row_cell ){
-									?><td><?php echo esc_html($row_cell); ?></td><?php
+									?><td><?php echo $row_cell; ?></td><?php
 									}
 								}
 								?>
@@ -538,7 +538,7 @@ class EM_Bookings_Table{
 				if( $csv || $EM_Booking->is_no_user() ){
 					$val = $EM_Booking->get_person()->get_name();
 				}else{
-					$val = '<a href="'.esc_url(add_query_arg(array('person_id'=>$EM_Booking->person_id, 'event_id'=>null), $EM_Booking->get_event()->get_bookings_url())).'">'. $EM_Booking->person->get_name() .'</a>';
+					$val = '<a href="'.esc_url(add_query_arg(array('person_id'=>$EM_Booking->person_id, 'event_id'=>null), $EM_Booking->get_event()->get_bookings_url())).'">'. esc_html($EM_Booking->person->get_name()) .'</a>';
 				}
 			}elseif($col == 'first_name'){
 				$val = esc_html($EM_Booking->get_person()->first_name);
@@ -581,6 +581,10 @@ class EM_Bookings_Table{
 				$val = $EM_Ticket->ticket_id;
 			}elseif( $col == 'booking_comment' ){
 				$val = $csv ? $EM_Booking->booking_comment : esc_html($EM_Booking->booking_comment);
+			}
+			//escape all HTML if destination is HTML or not defined
+			if( $format == 'html' || empty($format) ){
+				if( !in_array($col, array('user_name', 'event_name', 'actions')) ) $val = esc_html($val);
 			}
 			//use this 
 			$val = apply_filters('em_bookings_table_rows_col_'.$col, $val, $EM_Booking, $this, $csv, $object);

@@ -99,6 +99,8 @@ See our [FAQ](http://wp-events-plugin.com/documentation/faq/) page, which is upd
 6. Manage attendees with various booking reports
 
 == Changelog ==
+= 5.8.1.3 =
+* fixed escaping error in bookings admin table introduced in 5.8.1.3
 
 = 5.8.1.2 =
 * security release fixing a potential stored XSS vulnerability (disclosure pending, props to Luigi Gubello for responsible disclosure)
