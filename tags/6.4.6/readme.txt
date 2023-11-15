@@ -4,8 +4,8 @@ Donate link: https://wp-events-plugin.com
 Tags: bookings, calendar, tickets, events, buddypress, event management, google maps, maps, locations, registration, zoom
 Text Domain: events-manager
 Requires at least: 5.2
-Tested up to: 6.3
-Stable tag: 6.4.6
+Tested up to: 6.4.1
+Stable tag: 6.4.6.4
 Requires PHP: 5.3
 
 Fully featured event registration management including recurring events, locations management, calendar, Google map integration, booking management
@@ -160,6 +160,28 @@ See our [FAQ](http://wp-events-plugin.com/documentation/faq/) page, which is upd
 18. Grid view for displaying your upcoming events at a glance
 
 == Changelog ==
+= 6.4.6.4 =
+* Fixed issues with multiple bookings and anonymous bookings that could rewrite the user name of the account making the booking with the latest user information.
+* Fixed setting `is_available` to `EM_Ticket` not having any effect due to protected visibility, which can cause unpredictable behavior.
+* Fixed form `.em-ajax-form` not outputting the correct notice box on success.
+* Added JS for `em-cancel` button to include custom data into AJAX via the `data-` attribute.
+* Added `em_my_bookings_booking_action_links` filter allowing for array insertion of action links for my booking page bookings.
+
+= 6.4.6.3 =
+* Fixed telephone field auto-enabling and ignoring EM_PHONE_INTL_ENABLED constant introduced in 6.4.6
+
+= 6.4.6.2 =
+* Fixed booking summary showing for free events despite setting set to no.
+* Fixed edge cases where bookings do not get deleted properly due to unloaded ticket data.
+* Fixed various PHP warnings.
+
+= 6.4.6.1 =
+* Fixed array meta key retrieval and saving issues introduced in version 6.4.6.
+* Fixed first-time installation PHP errors and errant update notices.
+* Added `em_booking_form_js_fields_change_match` filter allowing for programmatic listening of custom field changes to update the booking form summary section.
+* Fixed front-end display issues of bookings containing two ticket types.
+* Fixed search form button not enabling after changing search params when advanced search is disabled.
+
 = 6.4.6 =
 * fixed fatal error caused by use of Pro function in settings page when Pro isn't activated, bug introduced in EM 6.4.5
 * fixed XSS vulnerability, disclosure to be followed
