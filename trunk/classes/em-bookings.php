@@ -689,8 +689,10 @@ class EM_Bookings extends EM_Object implements Iterator, ArrayAccess {
 		if( $filter_args ) {
 			$args = self::get_default_search($args);
 		}
-		$sql_parts['statement']['limit'] = ( $args['limit'] && is_numeric($args['limit'])) ? "LIMIT {$args['limit']}" : '';
-		$sql_parts['statement']['offset'] = ( $sql_parts['statement']['limit'] != "" && is_numeric($args['offset']) ) ? "OFFSET {$args['offset']}" : '';
+		if( !$count ) {
+			$sql_parts['statement']['limit'] = ( $args['limit'] && is_numeric($args['limit'])) ? "LIMIT {$args['limit']}" : '';
+			$sql_parts['statement']['offset'] = ( $sql_parts['statement']['limit'] != "" && is_numeric($args['offset']) ) ? "OFFSET {$args['offset']}" : '';
+		}
 		
 		//Get the default conditions
 		$sql_parts['data']['conditions'] = self::build_sql_conditions($args);
@@ -1185,6 +1187,9 @@ class EM_Bookings extends EM_Object implements Iterator, ArrayAccess {
 				$conditions['ticket'] = EM_BOOKINGS_TABLE.'.booking_id IN (SELECT booking_id FROM '.EM_TICKETS_BOOKINGS_TABLE." WHERE ticket_id='{$args['ticket_id']}')";
 			}
 		}
+		if( !empty($args['booking_id']) && static::array_is_numeric($args['booking_id']) ) {
+			$conditions['ticket'] = EM_BOOKINGS_TABLE.'.booking_id IN ('.implode(',', $args['booking_id']).')';
+		}
 		return apply_filters('em_bookings_build_sql_conditions', $conditions, $args);
 	}
 	
@@ -1204,6 +1209,7 @@ class EM_Bookings extends EM_Object implements Iterator, ArrayAccess {
 			'ticket_id' => false,
 			'array' => false, //returns an array of results if true, if an array or text it's assumed an array of specific table fields or single field name requested
 			'country' => false, // experimeenal, if you see this and want more locatiion booking searches, let us know!
+			'booking_id' => [],
 		);
 		//sort out whether defaults were supplied or just the array of search values
 		if( empty($array) ){
@@ -1212,7 +1218,7 @@ class EM_Bookings extends EM_Object implements Iterator, ArrayAccess {
 			$defaults = array_merge($defaults, $array_or_defaults);
 		}
 		//figure out default owning permissions
-		if( !current_user_can('edit_others_events') ){
+		if( !current_user_can('edit_others_events') || !isset($defaults['owner']) ){
 			$defaults['owner'] = get_current_user_id();
 		}else{
 			$defaults['owner'] = false;
@@ -1258,6 +1264,8 @@ class EM_Bookings extends EM_Object implements Iterator, ArrayAccess {
 			}
 			$search_defaults['orderby'] = !empty($clean_orderby) ? $clean_orderby : false;
 		}
+		// allow to filter by booking_id
+		$search_defaults = static::clean_id_atts($search_defaults, ['booking_id']);
 		// return the search defaults
 		return apply_filters('em_bookings_get_default_search', $search_defaults, $array, $defaults);
 	}

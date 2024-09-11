@@ -49,6 +49,32 @@ class Consent {
 		}
 	}
 	
+	/**
+	 * Checks a booking or person
+	 * @param $item
+	 * @param $type
+	 *
+	 * @return bool
+	 */
+	public static function has_consented( $item, $type = false ) {
+		if( $item instanceof \EM_Booking ) {
+			$EM_Booking = $item;
+			$EM_Person = $EM_Booking->get_person();
+		} elseif ( $item instanceof \EM_Person ) {
+			$EM_Person = $item;
+		}
+		$consented = $EM_Person->{ static::$options['meta_key'] } ?? null;
+		if ( $consented === null ) {
+			if( $EM_Person->{ static::$options['meta_key'] . '_revoked' } ) {
+				// if not revoked we can only assume they consented by default (in the event user had not previously consented)
+				$consented = false;
+			} elseif( get_option('dbem_data_' . static::$prefix . '_default') ) {
+				$consented = true;
+			}
+		}
+		return apply_filters( 'em_consent_has_consented', $consented == true, static::class, ['item' => $item, 'type' => $type, 'EM_Person' => $EM_Person ?? null ] );
+	}
+	
 	public static function get_error_booking() {
 		return get_option('dbem_data_' . static::$prefix . '_bookings_error');
 	}

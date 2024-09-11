@@ -41,6 +41,13 @@ class EM_Person extends WP_User{
 		do_action('em_person',$this, $person_id, $username);
 	}
 	
+	/**
+	 * //TODO : refactor this to handle no-user bookings too
+	 * @param $ids_only
+	 * @param $status
+	 *
+	 * @return mixed|null
+	 */
 	function get_bookings($ids_only = false, $status= false){
 		global $wpdb;
 		$status_condition = $blog_condition = '';

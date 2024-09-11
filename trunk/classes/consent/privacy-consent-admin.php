@@ -6,7 +6,7 @@ class Privacy_Consent_Admin extends Consent_Admin {
 	public static $prefix = 'privacy_consent';
 	
 	public static function get_admin_meta_box_title() {
-		return esc_html__ ( 'Privacy and Consent', 'events-manager');
+		return esc_html__ ( 'Privacy Policy and Consent', 'events-manager');
 	}
 	
 	public static function admin_options_intro() {
@@ -18,7 +18,7 @@ class Privacy_Consent_Admin extends Consent_Admin {
 	}
 	
 	public static function admin_options_settings_table_header () {
-		$privacy_options = static::get_privacy_options();
+		$privacy_options = static::get_consent_options();
 		?>
 		<thead>
 		<tr class="em-header">

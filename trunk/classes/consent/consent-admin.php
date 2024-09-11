@@ -14,7 +14,7 @@ class Consent_Admin {
 		add_action('em_settings_general_footer', [ static::class, 'admin_options'] );
 	}
 	
-	public static function get_privacy_options() {
+	public static function get_consent_options() {
 		return array(
 			0 => __('Do not include', 'events-manager'),
 			1 => __('Include all', 'events-manager'),
@@ -56,7 +56,7 @@ class Consent_Admin {
 	public static function admin_options_settings_table_header () {}
 	
 	public static function admin_options_settings_table_consent_options(){
-		$privacy_options = static::get_privacy_options();
+		$consent_options = static::get_consent_options();
 		$consent_remember = array(
 			0 => __('Always show and ask for consent', 'events-manager'),
 			1 => __('Remember and hide checkbox', 'events-manager'),
@@ -66,10 +66,10 @@ class Consent_Admin {
 		em_options_input_text( __('Bookings Consent Error', 'events-manager'), 'dbem_data_' . static::$prefix . '_bookings_error', __('If the consent checkbox is not checked during a booking, this error will be returned.', 'events-manager') );
 		em_options_input_text( __('Consent Error', 'events-manager'), 'dbem_data_' . static::$prefix . '_cpt_error', __('If the consent checkbox is not checked when submitting information such as events or locations, this error will be returned.', 'events-manager') );
 		em_options_select( __('Remembering Consent', 'events-manager'), 'dbem_data_' . static::$prefix . '_remember', $consent_remember, __('You can hide or leave the consent box checked for registered users who have provided consent previously.', 'events-manager') );
-		em_options_select( __( 'Event Submission Forms', 'events-manager'), 'dbem_data_' . static::$prefix . '_events', $privacy_options );
-		em_options_select( __( 'Location Submission Forms', 'events-manager'), 'dbem_data_' . static::$prefix . '_locations', $privacy_options );
-		em_options_select( __( 'Bookings Forms', 'events-manager'), 'dbem_data_' . static::$prefix . '_bookings', $privacy_options );
-		
+		em_options_select( __( 'Event Submission Forms', 'events-manager'), 'dbem_data_' . static::$prefix . '_events', $consent_options );
+		em_options_select( __( 'Location Submission Forms', 'events-manager'), 'dbem_data_' . static::$prefix . '_locations', $consent_options );
+		em_options_select( __( 'Bookings Forms', 'events-manager'), 'dbem_data_' . static::$prefix . '_bookings', $consent_options );
+		em_options_radio_binary( __('Consented By Default', 'events-manager'), 'dbem_data_' . static::$prefix . '_default', __('If a user has not previously given or revoked consent for a specific submitted data type (such as bookings), do we assume user has given consent by default?', 'events-manager') );
 	}
 	
 	public static function admin_options_settings_table_footer(){}

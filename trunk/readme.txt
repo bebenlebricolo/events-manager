@@ -3,10 +3,10 @@ Contributors: msykes, pxlite, nutsmuggler, netweblogic
 Donate link: https://wp-events-plugin.com
 Tags: events, calendar, tickets, bookings, appointments
 Text Domain: events-manager
-Requires at least: 5.2
+Requires at least: 5.3
 Tested up to: 6.6
 Stable tag: 6.5.2
-Requires PHP: 5.3
+Requires PHP: 7.0
 License: GPLv2
 
 Fully featured events calendar, booking registration (RSVP), recurring events, locations management, Google Maps
@@ -163,7 +163,7 @@ See our [FAQ](http://wp-events-plugin.com/documentation/faq/) page for helps wit
 18. Grid view for displaying your upcoming events at a glance
 
 == Changelog ==
-= 6.5.4 (dev) =
+= 6.6 =
 * Added communications consent. Ask or require users to consent to being contacted, with history of last acceptance or revocation accross all bookings/user (if admin has caps)
 * Added international phone number input field and validation, see the Phone Numbers section on Settings > General
 * Fixed bookings not showing in bookings table when in Multisite Global Mode
@@ -193,6 +193,13 @@ See our [FAQ](http://wp-events-plugin.com/documentation/faq/) page for helps wit
 * Fixed PHP notices on bookings admin tables.
 * Fixed $location_fields fatal PHP errors when loading maps and location-dependent event search queries.
 * Added option to exclude taxes from subtotal in booking summary pricing.
+* Added `EM_Bookings` search by `booking_id`.
+* Fixed `EM_Booking->can_rsvp()` occasionally providing incorrect result if number types are strings, as well as check to make sure booking is approved.
+* Added requirements check class.
+* Added `events_manager_plugin_loaded` action for loading any EM-dependent plugins early on in `plugins_loaded`.
+* Improved consent options including better `EM_Person` consent checks and a default to consented option if user already active (in development).
+* Fixed rows setting not getting saved.
+* Fixed summary issues showing empty summary section, fixed typo in new option from last commit (in development).
 
 = 6.5.2 =
 * Fixed fatal error on dashboard with Charts widget enabled.

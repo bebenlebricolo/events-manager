@@ -1327,6 +1327,15 @@ class EM_Booking extends EM_Object{
 	}
 	
 	/**
+	 * Returns true if booking is approved, i.e. confirmed. Takes into account that pending bookings may be auto-approved.
+	 * @return bool
+	 */
+	function is_approved() {
+		$result = $this->booking_status == 1 || ($this->booking_status == 0 && !get_option('dbem_bookings_approval'));
+		return apply_filters('em_booking_is_approved', $result, $this);
+	}
+	
+	/**
 	 * Set RSVP status to given number. Null sets booking to unconfirmed.
 	 *
 	 * @param null|int $status
@@ -1411,36 +1420,39 @@ class EM_Booking extends EM_Object{
 	 */
 	public function can_rsvp( $status ) {
 		$result = false;
-		if( get_option( 'dbem_bookings_rsvp' ) ) {
-			// check if we're changing the RSVP or doing anew with a specific status
-			if ( $this->booking_rsvp_status !== null && $this->can_change_rsvp() ) {
-				$can_rsvp = true;
-			} else {
-				$rsvpable_booking_statuses = apply_filters( 'em_booking_rsvpable_booking_statuses', array( 0, 1 ) );
-				if ( $this->booking_status === 3 && get_option( 'dbem_bookings_rsvp_sync_cancel' ) && $this->can_uncancel() ) {
-					$rsvpable_booking_statuses[] = 3;
-				}
-				$can_rsvp = in_array( $this->booking_status, $rsvpable_booking_statuses );
-			}
-			// general RSVP possible, now go deeper
-			if ( $can_rsvp ) {
-				if ( $status === null ) { // unconfirm
-					$result = $this->can_manage(); // we cannot unconfirm unless an admin
-				} elseif ( $status === 0 ) { // cancel
-					if ( get_option( 'dbem_bookings_rsvp_sync_cancel' ) && $this->booking_rsvp_status !== $status ) {
-						$result = $this->can_cancel();
-					} else {
-						$result = true;
+		if( $this->is_approved() ) {
+			if( get_option( 'dbem_bookings_rsvp' ) ) {
+				// check if we're changing the RSVP or doing anew with a specific status
+				if ( $this->booking_rsvp_status !== null && $this->can_change_rsvp() ) {
+					$can_rsvp = true;
+				} else {
+					$rsvpable_booking_statuses = apply_filters( 'em_booking_rsvpable_booking_statuses', array( 0, 1 ) );
+					if ( $this->booking_status === 3 && get_option( 'dbem_bookings_rsvp_sync_cancel' ) && $this->can_uncancel() ) {
+						$rsvpable_booking_statuses[] = 3;
 					}
-				} elseif ( $status === 1 ) { // confirm
-					$result = true;
-				} elseif ( $status === 2 ) { // maybe
-					if ( get_option( 'dbem_bookings_rsvp_maybe' ) ) {
-						$result = true;
-					}
+					$can_rsvp = in_array( $this->booking_status, $rsvpable_booking_statuses );
 				}
-				if( $result ){
-					$result = $this->booking_rsvp_status === $status ? null : true;
+				// general RSVP possible, now go deeper
+				if ( $can_rsvp ) {
+					if( $status !== null ) $status = absint( $status );
+					if ( $status === null ) { // unconfirm
+						$result = $this->can_manage(); // we cannot unconfirm unless an admin
+					} elseif ( $status === 0 ) { // cancel
+						if ( get_option( 'dbem_bookings_rsvp_sync_cancel' ) && $this->booking_rsvp_status !== $status ) {
+							$result = $this->can_cancel();
+						} else {
+							$result = true;
+						}
+					} elseif ( $status === 1 ) { // confirm
+						$result = true;
+					} elseif ( $status === 2 ) { // maybe
+						if ( get_option( 'dbem_bookings_rsvp_maybe' ) ) {
+							$result = true;
+						}
+					}
+					if( $result ){
+						$result = $this->booking_rsvp_status === $status ? null : true;
+					}
 				}
 			}
 		}

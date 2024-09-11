@@ -22,7 +22,12 @@ class Comms_Admin extends Consent_Admin {
 		?>
 		<thead>
 		<tr class="em-header">
-			<th colspan="2"><h4><?php esc_html_e('Communications Consent', 'events-manager'); ?></h4></th>
+			<th colspan="2">
+				<h4><?php esc_html_e('Communications Consent', 'events-manager'); ?></h4>
+				<p>
+					<?php esc_html_e('You can also request specific consent from your users to be contacted via supplied communication options (Email, Phone, SMS, WhatsApp, Facebook, Telegram etc.), this can be separate to your privacy policy, given that this relates to consenting to non-essential communication such as marketing or non-email-based reminders.', 'events-manager'); ?>
+				</p>
+			</th>
 		</tr>
 		</thead>
 		<?php

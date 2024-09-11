@@ -168,7 +168,7 @@ namespace EM {
 				$_GET['order'] = strtolower($this->order); // for WP_List_Table
 				$_GET['orderby'] = $this->orderby;
 			}
-			$this->limit = ( !empty($_REQUEST['limit']) && is_numeric($_REQUEST['limit'])) ? $_REQUEST['limit'] : 20;//Default limit
+			$this->limit = ( !empty($_REQUEST['limit']) && is_numeric($_REQUEST['limit'])) ? $_REQUEST['limit'] : $this->limit;//Default limit
 			$this->page = ( !empty($_REQUEST['pno']) && is_numeric($_REQUEST['pno']) ) ? $_REQUEST['pno']:1;
 			$_REQUEST['paged'] = $this->page;
 			$this->offset = ( $this->page > 1 ) ? ($this->page-1)*$this->limit : 0;

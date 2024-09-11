@@ -45,13 +45,12 @@ class Comms extends Consent {
 		}
 	}
 	
-	
 	/* -------------------------------- USER PROFILE AREAS -------------------------------- */
 	
 	
 	public static function em_person_display_summary_bottom( $EM_Person ) {
 		// output a td with consent
-		$consented = $EM_Person->{ static::$options['meta_key'] };
+		$consented = static::has_consented( $EM_Person );
 		$already_revoked = $EM_Person->{ static::$options['meta_key'] . '_revoked' };
 		$consent_text = $consented ? __('Yes', 'events-manager') : __('No', 'events-manager');
 		?>
@@ -73,7 +72,7 @@ class Comms extends Consent {
 	public static function em_nouser_booking_details_modified( $EM_Booking ) {
 		// first check if consent has changed in the past minute, if not then we don't bother
 		$EM_Person = $EM_Booking->get_person();
-		$already_consented = $EM_Person->{ static::$options['meta_key'] };
+		$already_consented = static::has_consented( $EM_Person );
 		$already_revoked = $EM_Person->{ static::$options['meta_key'] . '_revoked' };
 		if ( $already_consented || $already_revoked ) {
 			$one_minute_ago = time() - 60;
@@ -99,6 +98,43 @@ class Comms extends Consent {
 				static::update_nouser_bookings_consent( $EM_Person, $event_owner_id );
 			}
 		}
+	}
+	
+	/**
+	 * @param EM_Person $EM_Person
+	 * @param bool $consented
+	 *
+	 * @return int|bool
+	 */
+	public static function update_user_consent( $EM_Person, $consented = null ) {
+		// update consent of user if they are a user
+		$consent_action = null;
+		$already_consented = $EM_Person->{ self::$options['meta_key'] };
+		if ( $consented ) {
+			// user has consented
+			if ( !$already_consented ) {
+				// add consent
+				if( $EM_Person->ID ) {
+					update_user_meta( $EM_Person->ID, self::$options['meta_key'], current_time( 'mysql', true ) );
+				}
+				$EM_Person->{self::$options['meta_key']} = current_time( 'mysql', true );
+				$consent_action = true;
+			}
+		} elseif ( $consented === false || $already_consented ) { // if consent not explicitly revoked and no consent previously given, we don't take definitive action
+			// only add a revoked record if currently consented or explicitly revoked, otherwise it's neither consented or revoked
+			if( $EM_Person->ID ) {
+				delete_user_meta( $EM_Person->ID, self::$options['meta_key'] );
+				update_user_meta( $EM_Person->ID, self::$options['meta_key'] . '_revoked', current_time( 'mysql', true ) );
+			}
+			unset( $EM_Person->{self::$options['meta_key']} );
+			$EM_Person->{self::$options['meta_key'] . '_revoked'} = current_time( 'mysql', true );
+			$consent_action = false;
+		}
+		if( $consent_action !== null ) {
+			// if we consented or revoked, and user may have no-user bookings, we try to update those too, we can update all known records since it's either an admin or the user changing consent
+			$result = static::update_nouser_bookings_consent( $EM_Person ) > 0;
+		}
+		return !empty($result) || ($EM_Person->ID && $consent_action !== null );
 	}
 	
 	public static function update_nouser_bookings_consent( $EM_Person, $event_owner_id = false ) {
@@ -128,9 +164,10 @@ class Comms extends Consent {
 				}
 			}
 			if( count($inserts) > 0 ) {
-				$wpdb->query( 'INSERT INTO ' . EM_BOOKINGS_META_TABLE . ' (booking_id, meta_key, meta_value) VALUES ' . implode( ',', $inserts ) );
+				return $wpdb->query( 'INSERT INTO ' . EM_BOOKINGS_META_TABLE . ' (booking_id, meta_key, meta_value) VALUES ' . implode( ',', $inserts ) );
 			}
 		}
+		return 0; // nothing to update
 	}
 	
 	/**
@@ -230,25 +267,9 @@ class Comms extends Consent {
 	 * @return void
 	 */
 	public static function save_profile_fields( $user_id ) {
-		$already_consented = get_user_meta( $user_id, self::$options['meta_key'], true );
-		$consent_action = null;
-		if( !empty($_REQUEST[ static::$options['param'] ]) ){
-			if( !$already_consented ) {
-				// add consent
-				update_user_meta( $user_id, self::$options['meta_key'], current_time( 'mysql', true ) );
-				$consent_action = true;
-			}
-		} elseif( $already_consented ) {
-			// only add a revoked record if currently consented, otherwise it's neither consented or revoked
-			delete_user_meta( $user_id, self::$options['meta_key'] );
-			update_user_meta( $user_id, self::$options['meta_key'] . '_revoked', current_time( 'mysql', true ) );
-			$consent_action = false;
-		}
-		// if we consented or revoked, and user may have no-user bookings, we try to update those too, we can update all known records since it's either an admin or the user changing consent
-		if( $consent_action !== null && get_option('dbem_bookings_registration_disable_user_emails') ) {
-			$EM_Person = new EM_Person($user_id);
-			static::update_nouser_bookings_consent( $EM_Person );
-		}
+		$EM_Person = new EM_Person($user_id);
+		$consented = !empty($_REQUEST[ static::$options['param'] ]) ? true : null;
+		static::update_user_consent( $EM_Person, $consented );
 	}
 	
 	/* -------------------------------- BOOKING TABLES -------------------------------- */

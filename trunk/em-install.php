@@ -913,6 +913,7 @@ function em_add_options() {
 		'dbem_data_privacy_consent_events' => 1,
 		'dbem_data_privacy_consent_locations' => 1,
 		'dbem_data_privacy_consent_bookings' => 1,
+		'dbem_data_privacy_consent_default' => 1,
 		'dbem_data_privacy_export_events' => 1,
 		'dbem_data_privacy_export_locations' => 1,
 		'dbem_data_privacy_export_bookings' => 1,
@@ -929,6 +930,7 @@ function em_add_options() {
 		'dbem_data_comms_consent_events' => 0,
 		'dbem_data_comms_consent_locations' => 0,
 		'dbem_data_comms_consent_bookings' => 0,
+		'dbem_data_comms_consent_default' => 1,
 		// security options
 		'dbem_shortcodes_decode_content' => $already_installed && version_compare( get_option('dbem_version', 0), '6.4.8', '<'),
 		'dbem_shortcodes_kses_decoded_content' => 1,
@@ -983,7 +985,7 @@ function em_upgrade_current_installation(){
 		update_site_option('dbem_data', $data);
 	}
 	// temp promo
-	if( time() < 1723680000 && ( version_compare($current_version, '6.4.7', '<') || !empty($data['admin-modals']['review-nudge']) )  ) {
+	if( time() < 1726747200 && ( version_compare($current_version, '6.6', '<') || !empty($data['admin-modals']['review-nudge']) )  ) {
 		if( empty($data['admin-modals']) ) $data['admin-modals'] = array();
 		$data['admin-modals']['promo-popup'] = true;
 		update_site_option('dbem_data', $data);

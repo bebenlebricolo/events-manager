@@ -1,7 +1,7 @@
 <?php
 /*
 Plugin Name: Events Manager
-Version: 6.5.4
+Version: 6.6
 Plugin URI: https://wp-events-plugin.com
 Description: Event registration and booking management for WordPress. Recurring events, locations, webinars, google maps, rss, ical, booking registration and more!
 Author: Pixelite
@@ -28,8 +28,8 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 */
 
 // Setting constants
-define('EM_VERSION', '6.5.4'); //self expanatory, although version currently may not correspond directly with published version number. until 6.0 we're stuck updating 5.999.x
-define('EM_PRO_MIN_VERSION', '3.3'); //self expanatory
+define('EM_VERSION', '6.6'); //self expanatory, although version currently may not correspond directly with published version number. until 6.0 we're stuck updating 5.999.x
+define('EM_PRO_MIN_VERSION', '3.4'); //self expanatory
 define('EM_PRO_MIN_VERSION_CRITICAL', '3.0'); //self expanatory
 define('EM_DIR', dirname( __FILE__ )); //an absolute path to this directory
 define('EM_DIR_URI', trailingslashit(plugins_url('',__FILE__))); //an absolute path to this directory
@@ -62,6 +62,12 @@ function dbem_debug_mode(){
 	}
 }
 //add_action('plugins_loaded', 'dbem_debug_mode');
+
+// do requirements check
+include( EM_DIR . '/classes/requirements-check.php' );
+$requirements = new EM\Requirements_Check();
+if( !$requirements->passes(false) ) return;
+unset($requirements);
 
 // INCLUDES
 //Base classes
@@ -1305,4 +1311,9 @@ $v6 = EM_Options::get('v6', null);
 if( $v6 !== null ){
 	include( EM_DIR . '/v6-migrate.php' );
 }
+
+function events_manager_plugin_loaded(){
+	do_action('events_manager_plugin_loaded');
+}
+add_action('plugins_loaded','events_manager_plugin_loaded');
 ?>
