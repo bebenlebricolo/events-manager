@@ -5,7 +5,7 @@ Tags: events, calendar, tickets, bookings, appointments
 Text Domain: events-manager
 Requires at least: 5.3
 Tested up to: 6.6
-Stable tag: 6.6
+Stable tag: 6.6.1
 Requires PHP: 7.0
 License: GPLv2
 
@@ -15,7 +15,7 @@ Fully featured events calendar, booking registration (RSVP), recurring events, l
 
 Events Manager is a full-featured event calendar, bookings and registration management plugin for WordPress based on the principles of flexibility, reliability and powerful features!
 
-** Limited-Time Offer - Up to 30% our current price plans! [Get Pro Now](https://wp-events-plugin.com/pricing/?utm_source=repo&utm_medium=readme&utm_campaign=promo2024-02) **
+**Limited-Time Offer - Up to 30% our current price plans! [Get Pro Now](http://em.cm/promo2024-09-readme)**
 
 * [Demo](https://eventsmanager.site)
 * [Documentation](http://wp-events-plugin.com/documentation/)
@@ -163,6 +163,10 @@ See our [FAQ](http://wp-events-plugin.com/documentation/faq/) page for helps wit
 18. Grid view for displaying your upcoming events at a glance
 
 == Changelog ==
+= 6.6.1 =
+* fixed some initial phone number display issues overlapping country selectors on front-end
+* fixed fatal error in settings page
+
 = 6.6 =
 * Added communications consent. Ask or require users to consent to being contacted, with history of last acceptance or revocation accross all bookings/user (if admin has caps)
 * Added international phone number input field and validation, see the Phone Numbers section on Settings > General

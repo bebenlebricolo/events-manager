@@ -83,6 +83,7 @@
 	input[type=tel], &.iti--allow-dropdown > input, &.iti--allow-dropdown input[type=tel], &.iti--allow-dropdown > input[type=text], &.iti--separate-dial-code > input, &.iti--separate-dial-code > input[type=tel], &.iti--separate-dial-code > input[type=text] {
 		padding-right: 6px !important;
 		margin-left: 0 !important;
+		--input-padding : 6px 10px 6px 90px !important;
 	}
 
 	--iti-path-flags-1x: url('../external/intl-tel-input/img/flags.webp') !important;

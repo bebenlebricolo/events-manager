@@ -5176,6 +5176,7 @@
 .em .iti input[type=tel], .em .iti.iti--allow-dropdown > input, .em .iti.iti--allow-dropdown input[type=tel], .em .iti.iti--allow-dropdown > input[type=text], .em .iti.iti--separate-dial-code > input, .em .iti.iti--separate-dial-code > input[type=tel], .em .iti.iti--separate-dial-code > input[type=text] {
   padding-right: 6px !important;
   margin-left: 0 !important;
+  --input-padding: 6px 10px 6px 90px !important;
 }
 @media (min-resolution: 2x) {
   .em .iti .iti__flag {

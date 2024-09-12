@@ -4436,7 +4436,7 @@ if ( EM.phone ) {
 				alt.value = iti.getNumber();
 				// check input padding inline style and set it to important
 				if( input.getAttribute('style') ) {
-					let pixels = parseInt( input.style.paddingLeft.replace('px', '') ) + 0; // pad this an extra px
+					let pixels = parseInt(input.style.paddingLeft.replace('px', '')); // pad this an extra px
 					input.style.setProperty('padding-left', pixels + 'px', 'important' );
 				}
 			});

@@ -6246,6 +6246,7 @@
 .wp-admin .em .iti input[type=tel], .wp-admin .em .iti.iti--allow-dropdown > input, .wp-admin .em .iti.iti--allow-dropdown input[type=tel], .wp-admin .em .iti.iti--allow-dropdown > input[type=text], .wp-admin .em .iti.iti--separate-dial-code > input, .wp-admin .em .iti.iti--separate-dial-code > input[type=tel], .wp-admin .em .iti.iti--separate-dial-code > input[type=text] {
   padding-right: 6px !important;
   margin-left: 0 !important;
+  --input-padding: 6px 10px 6px 90px !important;
 }
 @media (min-resolution: 2x) {
   .wp-admin .em .iti .iti__flag {
