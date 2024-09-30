@@ -985,7 +985,7 @@ function em_upgrade_current_installation(){
 		update_site_option('dbem_data', $data);
 	}
 	// temp promo
-	if( time() < 1726747200 && ( version_compare($current_version, '6.6', '<') || !empty($data['admin-modals']['review-nudge']) )  ) {
+	if( time() < 1728302400 && ( version_compare($current_version, '6.6', '<') || !empty($data['admin-modals']['review-nudge']) )  ) {
 		if( empty($data['admin-modals']) ) $data['admin-modals'] = array();
 		$data['admin-modals']['promo-popup'] = true;
 		update_site_option('dbem_data', $data);
