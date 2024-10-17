@@ -255,9 +255,15 @@ class EM_Tickets_Bookings extends EM_Object implements Iterator, Countable, Arra
 			}
 			// now, build a unique set of selectors, first finder taking precedence
 			$selector_fields = array('booking_id');
+			// clean orderbys in case some ASC and DESC strings made it here
+			$orderbys_clean = [];
+			foreach( $sql_parts['data']['orderbys'] as $orderby ) {
+				$orderbys_clean[] = str_replace([' ASC', ' DESC', ' asc', ' desc'], '', $orderby);
+			}
+			// add orderby fields to selectors
 			foreach( $fields as $table => $table_fields ){
 				foreach( $table_fields as $field ){
-					if ( in_array($field, $sql_parts['data']['orderbys']) && !in_array($field, $selector_fields) ) {
+					if ( in_array($field, $orderbys_clean) && !in_array($field, $selector_fields) ) {
 						$selector_fields[] = $field;
 						$selectors[] = $table . '.' . $field;
 					}

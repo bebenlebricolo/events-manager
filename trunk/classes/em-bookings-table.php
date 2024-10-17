@@ -590,6 +590,7 @@ class EM_Bookings_Table extends EM\List_Table {
 				$allowed_actions = [];
 				break;
 		}
+		$allowed_actions = apply_filters('em_bookings_table_booking_allowed_actions', $allowed_actions, $EM_Booking, ['table' => $this, 'item' => $EM_Object, 'actions' => $actions]);
 		// create actions array where key in $booking_actions exists in $data
 		foreach( $allowed_actions as $action ){
 			if( !empty($actions[$action]) ) {
@@ -597,7 +598,7 @@ class EM_Bookings_Table extends EM\List_Table {
 			}
 		}
 		// return the data
-		return apply_filters('em_bookings_table_get_booking_allowed_actions', $booking_actions, $this, ['item' => $EM_Object, 'actions' => $actions, 'allowed_actions' => $allowed_actions]);
+		return apply_filters('em_bookings_table_get_booking_allowed_actions', $booking_actions, $this, ['booking' => $EM_Booking, 'item' => $EM_Object, 'actions' => $actions, 'allowed_actions' => $allowed_actions]);
 	}
 	
 	/**
