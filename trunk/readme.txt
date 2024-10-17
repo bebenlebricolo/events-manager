@@ -85,7 +85,7 @@ We have a premium [Pro add-on for Events Manager](http://eventsmanagerpro.com/go
  * Manage bookings on your phone
  * Check In/Out users
 * Waitlists
-* Automation (NEW!) - ultimate flexibility in automation!
+* Automation - ultimate flexibility in automation!
  * Triggers:
   * X time before/after events start
   * When a booking status changes
@@ -93,6 +93,8 @@ We have a premium [Pro add-on for Events Manager](http://eventsmanagerpro.com/go
  * Actions
   * Send Webhook (Zapier, MS Automation and many other services)
   * Send Email
+  * Send WhatsApp, SMS, Telegram notifications
+* WhatsApp, SMS, Telegram integration and interactive flows
 * Coupon Codes
 * Custom booking email per event and gateway
 * Faster support via private Pro forums
