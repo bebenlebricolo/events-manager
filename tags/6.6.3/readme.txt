@@ -4,7 +4,7 @@ Donate link: https://wp-events-plugin.com
 Tags: events, calendar, tickets, bookings, appointments
 Text Domain: events-manager
 Requires at least: 5.3
-Tested up to: 6.6
+Tested up to: 6.7
 Stable tag: 6.6.3
 Requires PHP: 7.0
 License: GPLv2
@@ -14,8 +14,6 @@ Fully featured events calendar, booking registration (RSVP), recurring events, l
 == Description ==
 
 Events Manager is a full-featured event calendar, bookings and registration management plugin for WordPress based on the principles of flexibility, reliability and powerful features!
-
-**Limited-Time Offer - Up to 30% our current price plans! [Get Pro Now](http://em.cm/promo2024-09-readme)**
 
 * [Demo](https://eventsmanager.site)
 * [Documentation](http://wp-events-plugin.com/documentation/)
@@ -74,7 +72,7 @@ We provide the tools to [help you be GDPR compliant](http://wp-events-plugin.com
 
 We have a premium [Pro add-on for Events Manager](http://eventsmanagerpro.com/gopro/) which not only demonstrates the flexibility of Events Manager, but also adds some important features including but not limited to:
 
-* WooCommerce integration ([sold separately](https://wp-events-plugin.com/woocommerce/))
+* WooCommerce integration ([sold separately](https://em.cm/wc))
 * PayPal, Stripe, Authorize.net and Offline Payments
 * Custom booking forms
 * Individual Attendee custom forms
