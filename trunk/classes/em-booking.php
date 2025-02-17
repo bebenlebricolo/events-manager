@@ -224,6 +224,8 @@ class EM_Booking extends EM_Object{
 	    	return $this->get_person();
 	    }elseif( $var == 'date' ){
 			return $this->date();
+	    }elseif( $var == 'uuid' ){
+		    return $this->booking_uuid;
 	    }
 	    return null;
 	}

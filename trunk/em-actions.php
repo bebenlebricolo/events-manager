@@ -783,14 +783,12 @@ function em_ajax_search_and_pagination(){
 			case 'list':
 				$args = EM_Locations::get_post_search($args);
 				$args['limit'] = !empty($args['limit']) ? $args['limit'] : get_option('dbem_locations_default_limit');
-				em_locate_template('templates/locations-list.php', true, array('args'=>$args)); //if successful, this template overrides the settings and defaults, including search
 				break;
 			case 'map':
 				$args = EM_Locations::get_post_search($args);
 				$args['width'] = '100%';
 				$args['height'] = 0;
 				$args['limit'] = 0;
-				echo em_get_locations_map_shortcode( $args );
 				break;
 		}
 		em_output_locations_view($args, $view);

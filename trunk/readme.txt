@@ -3,9 +3,9 @@ Contributors: msykes, pxlite, nutsmuggler, netweblogic
 Donate link: https://wp-events-plugin.com
 Tags: events, calendar, tickets, bookings, appointments
 Text Domain: events-manager
-Requires at least: 5.3
+Requires at least: 6.1
 Tested up to: 6.7
-Stable tag: 6.6.3
+Stable tag: 6.6.4
 Requires PHP: 7.0
 License: GPLv2
 
@@ -163,6 +163,46 @@ See our [FAQ](http://wp-events-plugin.com/documentation/faq/) page for helps wit
 18. Grid view for displaying your upcoming events at a glance
 
 == Changelog ==
+= 6.6.4 =
+* Fixed security vulnerability allowing SQL injection responsibly disclosed by mikemyers via WordFence Security Services.
+* Added `em_bookings_table_display_hidden_input` hook to bookings table.
+* Fixed missing bookings for person/user view of bookings.
+* Added possibility for multiple person search in bookings, allowing viewing of bookings from more than one user programmatically.
+* Updated plugin header with license and updated copyright year.
+* Added HTML props to booking editor view allowing access to booking sections by ticket ID via JS.
+* Fixed PHP notices with interfering plugins via `the_content`.
+* Fixed PHP fatal error when installing/upgrading in WP versions < 6.1.
+* Fixed PHP fatal error due to plugin conflict invoking `parse_query` in different ways.
+* Fixed translation issue in calendar modal title not using localized domain.
+* Fixed missing div in `templates/forms/event-editor.php`.
+* Changed `maps-global.php` to store map JSON data as an `application/json` script element rather than a regular div to improve SEO and coding standards.
+* Migrated partial use of jQuery in `maps.js` (minor).
+* Fixed `not_all_day` conditional placeholder showing same result as `all_day`.
+* Fixed EM taking over 'scheduled' posts view for any CPT type and showing all posts instead.
+* Fixed BuddyPress group nav links generating PHP error due to deprecated function.
+* Fixed events BuddyPress group link not showing in groups nav bar since a recent EM update.
+* Fixed calendar advanced search disappearing when filters are chosen and first search is initiated.
+* Fixed taxonomy single term pages showing up blank on some themes when overriding formatting is enabled.
+* Changed `EM_Taxonomy_Frontend` to use static binding.
+* Fixed duplicate map placeholders showing in AJAX calls when searching.
+* Fixed non-AJAX pagination persistence issues when coupled with search form.
+* Added `has_search` support to `events_list`, `events_map`, `events_list_grouped`, `locations_map`, `locations_list` shortcodes allowing for search forms to be added above.
+* Optimized code by removing redundant/duplicate code fragments and centralized shortcode and list generation using `em_output_events_view()` and `em_output_locations_view()`.
+* Fixed maps JS display bug after an AJAX search.
+* Fixed search form JS issues when searching with non-AJAX mode.
+* Fixed minor attendee form aesthetic issues in booking editor.
+* Fixed consent functionality preventing event submission forms from going through.
+* Fixed phone number field setting saving issues for restricting countries.
+* Added support for `EM_Object->add_error()` for `EM_Exceptions`.
+* Implemented new uploader UI and further integration with FilePond by pqina.
+* Completely revamped uploading API via `EM\Uploads\Uploader` and `EM\Uploads\API` classes.
+* Added `update_meta` function for updating individual `EM_Ticket_Booking` object meta items.
+* Added `em_ticket_booking_save` filter for `EM_Ticket_Booking` object.
+* Added new JS/CSS loading module which loads individual assets only when needed via JS.
+* Fixed countries list inconsistency if adding blank files consecutively followed by another call without adding blanks.
+* Fixed max file size validation false positives (in development).
+* Fixed JS errors when no uploader editor HTML is present (in development).
+
 = 6.6.3 =
 * Fixed JS error preventing full bookings table admin AJAX functionality in certain languages such as French.
 * Fixed SQL ordering issues causing empty attendee and ticket views in bookings admin area.
