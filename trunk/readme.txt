@@ -5,7 +5,7 @@ Tags: events, calendar, tickets, bookings, appointments
 Text Domain: events-manager
 Requires at least: 6.1
 Tested up to: 6.7
-Stable tag: 6.6.4
+Stable tag: 6.6.4.1
 Requires PHP: 7.0
 License: GPLv2
 
@@ -76,6 +76,7 @@ We have a premium [Pro add-on for Events Manager](http://eventsmanagerpro.com/go
 * PayPal, Stripe, Authorize.net and Offline Payments
 * Custom booking forms
 * Individual Attendee custom forms
+* Upload fields for bookings, attendees and users
 * Printable Invoices and Tickets
 * Send PDF tickets/invoices by email automatically
 * Check In/Out
@@ -163,6 +164,21 @@ See our [FAQ](http://wp-events-plugin.com/documentation/faq/) page for helps wit
 18. Grid view for displaying your upcoming events at a glance
 
 == Changelog ==
+
+= 6.6.4.1 =
+* Changed `EM_Mailer` so that `send()` can be called statically and non-statically to avoid legacy errors.
+* Removed redundant `EM_Booking->process_meta()` function already in `EM_Object`.
+* Fixed booking meta processing issues omitting certain field keys with special non-alphanumeric characters.
+* Fixed potential PHP fatal error when exporting CSV reports.
+* Fixed image size validation issues in visual uploader.
+* Fixed PHP notice when validation fails for phone numbers during booking user initial registration.
+* Tweaked UI visuals to improve sizing and compatibility.
+* Fixed issue where undo upload deletion options were not appearing.
+* Fixed uploader booking admin views loading uploaded files twice for preview in editor/viewer modes.
+* Improved `EM_Ticket_Booking->update_meta()` so it deletes array keys that aren't defined anymore.
+* Improved `EM_Booking->update_meta()` so a third parameter `$subkey` restricts deletion to a specific key in a meta group.
+* Added further encapsulation of data in uploader to avoid dependence on `$_REQUEST` data and allowing for multi-dimensional layers of a booking (such as a multi-booking upload).
+
 = 6.6.4 =
 * Fixed security vulnerability allowing SQL injection responsibly disclosed by mikemyers via WordFence Security Services.
 * Added `em_bookings_table_display_hidden_input` hook to bookings table.
@@ -200,8 +216,6 @@ See our [FAQ](http://wp-events-plugin.com/documentation/faq/) page for helps wit
 * Added `em_ticket_booking_save` filter for `EM_Ticket_Booking` object.
 * Added new JS/CSS loading module which loads individual assets only when needed via JS.
 * Fixed countries list inconsistency if adding blank files consecutively followed by another call without adding blanks.
-* Fixed max file size validation false positives (in development).
-* Fixed JS errors when no uploader editor HTML is present (in development).
 
 = 6.6.3 =
 * Fixed JS error preventing full bookings table admin AJAX functionality in certain languages such as French.

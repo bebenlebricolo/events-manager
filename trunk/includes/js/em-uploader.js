@@ -50,6 +50,9 @@ document.addEventListener('em_uploader_ready', function(e) {
 		return name.replace(/\[\]/, '');
 	}
 
+	let filenames = {};
+	let sources = {};
+
 	setup_em_loader = function( container ) {
 		container.querySelectorAll('input.em-uploader').forEach(input => {
 			let input_data = {};
@@ -71,8 +74,6 @@ document.addEventListener('em_uploader_ready', function(e) {
 					FilePondPluginPdfPreviewOverlay,
 					FilePondPluginFileIcon
 				);
-				let filenames = {};
-				let sources = {};
 				// Loop through and initialize FilePond
 				const apiURL = new URL(EM.uploads.endpoint);
 				apiURL.searchParams.set('path', input.dataset.apiPath || '');
@@ -93,13 +94,15 @@ document.addEventListener('em_uploader_ready', function(e) {
 									source: file.url,
 									type: 'local',
 									options: {
-										type: 'local',
 										metadata: {
 											id: file.id,
 											previouslyUploaded: true,
 										},
 									}
 								};
+								if ( !file.deleted ) {
+									opt.options.type = 'local';
+								}
 							} else {
 								opt = {
 									source: file.id,
@@ -116,7 +119,9 @@ document.addEventListener('em_uploader_ready', function(e) {
 							}
 							file.opt = opt;
 							input_data[file.id] = file;
-							files.push(opt);
+							if ( !file.deleted ) {
+								files.push(opt);
+							}
 						});
 					}
 				}
@@ -320,10 +325,10 @@ document.addEventListener('em_uploader_ready', function(e) {
 					imagePreviewHeight: 100,
 					// image size validation
 					allowImageValidateSize: true,
-					imageValidateSizeMinWidth: EM.uploads.images.image_min_width || null,
-					imageValidateSizeMaxWidth: EM.uploads.images.image_max_width || null,
-					imageValidateSizeMinHeight: EM.uploads.images.image_min_size || null,
-					imageValidateSizeMaxHeight: EM.uploads.images.image_max_size || null,
+					imageValidateSizeMinWidth: EM.uploads.images.image_min_width || 0,
+					imageValidateSizeMaxWidth: EM.uploads.images.image_max_width || 6144,
+					imageValidateSizeMinHeight: EM.uploads.images.image_min_height || 0,
+					imageValidateSizeMaxHeight: EM.uploads.images.image_max_height || 6144,
 					// file validation
 					allowFileSizeValidation: true,
 					maxFileSize: EM.uploads.files.max_file_size || null,
@@ -476,13 +481,13 @@ document.addEventListener('em_uploader_ready', function(e) {
 					fileItem = fileOrId;
 				}
 				if ( fileItem ) {
+					if ( tbdList ) {
+						tbdList.appendChild(fileItem);
+					}
 					const fileId = fileItem.dataset.file_id;
 					addDeleteInput(fileId);
 					updateListVisibility();
 					updateInputVisibility();
-					if ( tbdList ) {
-						tbdList.appendChild(fileItem);
-					}
 				}
 			};
 
@@ -511,13 +516,14 @@ document.addEventListener('em_uploader_ready', function(e) {
 						let file = input_data[fileId];
 
 						// Restore into FilePond
+						file.opt.options.type = 'local';
 						pond.addFile( file.opt.source, file.opt.options ).then(() => {
-							removeDeleteInput(fileId);
-							updateListVisibility();
-							updateInputVisibility();
 							if ( uploadList ) {
 								uploadList.appendChild(fileItem);
 							}
+							removeDeleteInput(fileId);
+							updateListVisibility();
+							updateInputVisibility();
 						}).catch(() => {
 							alert(`Failed to restore file: ${input_data[fileId].name}`);
 						});

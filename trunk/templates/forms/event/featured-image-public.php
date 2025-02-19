@@ -6,7 +6,7 @@
 global $EM_Event;
 /* @var $EM_Event EM_Event */
 ?>
-<div class="em-input-upload em-input-upload-post-image">
+<div class="em-input-upload em-input-upload-post-image input">
 	<label for='event_image'><?php _e('Upload/change picture', 'events-manager') ?></label>
 	<?php EM\Uploads\Uploader::post_image_uploader( $EM_Event, 'event-image', 'event_image' ); ?>
 </div>

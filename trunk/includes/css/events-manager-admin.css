@@ -399,6 +399,10 @@
 .wp-admin body .pac-container, .wp-admin .em .flatpickr-calendar {
   z-index: 100000 !important;
 }
+.wp-admin .em-input-upload {
+  min-width: 300px;
+  max-width: 800px;
+}
 .wp-admin .em-input-upload .em-input-upload-files, .wp-admin .em-input-upload .em-input-upload-files-tbd {
   margin-top: 0;
   padding-top: 0;

@@ -8,7 +8,17 @@
 	}
 }
 
-.em .input .em-input-upload, .em.pixelbones .input .em-input-upload, .em-input-upload {
+.wp-admin {
+	.em .input .em-input-upload, .em.pixelbones .em-input-upload.input, .em-input-upload {
+		.filepond--panel-root {
+			.filepond--panel-root, .filepond--panel-top::after {
+				background-color: #dbdbdd !important;
+			}
+		}
+	}
+}
+
+.em .input .em-input-upload, .em.pixelbones .em-input-upload.input, .em-input-upload {
 	/* Custom Filepond Rules */
 	.em-input-upload-fallback {
 		display: none;

@@ -6,7 +6,7 @@
 global $EM_Location;
 /* @var $EM_Location EM_Location */
 ?>
-<div class="em-input-upload em-input-upload-post-image">
+<div class="em-input-upload em-input-upload-post-image input">
 	<label for='location-image'><?php _e('Upload/change picture', 'events-manager') ?></label>
 	<?php EM\Uploads\Uploader::post_image_uploader( $EM_Location, 'location-image', 'location_image' ); ?>
 </div>

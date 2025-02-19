@@ -5194,6 +5194,10 @@
     background-image: var(--icon-phone);
   }
 }
+.em .em-input-upload {
+  min-width: 300px;
+  max-width: 800px;
+}
 .em .em-input-upload .em-input-upload-files, .em .em-input-upload .em-input-upload-files-tbd {
   margin-top: 0;
   padding-top: 0;

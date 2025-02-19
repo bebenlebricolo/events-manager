@@ -134,7 +134,7 @@ class Uploader {
 		$merged_options['type'] = array_map('strtolower', $merged_options['type']);
 
 		// max filesize is always at most wp_max_upload_size();
-		if ( $merged_options['max_file_size'] > wp_max_upload_size() ) {
+		if ( empty($merged_options['max_file_size']) || $merged_options['max_file_size'] > wp_max_upload_size() ) {
 			$merged_options['max_file_size'] = wp_max_upload_size();
 		}
 		return $merged_options;
@@ -181,18 +181,19 @@ class Uploader {
 	 *
 	 * Locates the file (saved earlier with a custom suffix), reads its properties (size, mime type, etc.), and populates $_FILES so that further processing works just like a normal upload.
 	 *
-	 * @param string $file_key The form field key to assign in $_FILES, which would match a submitted $_REQUEST array item with corresponding file IDs
+	 * @param array|string  $file_key  The form field key to assign in $_FILES, which would match a submitted $_REQUEST array item with corresponding file IDs. If an array is supplied then it can match the path of a nested variable.
+	 * @param array         $data      Data that can override the $_REQUEST variables, expects fields matching $file_key, such as ['field_key' => ['tmp_file_id'], 'field_key--names' => ['tmp_file_id' => 'temp-file-upload.jpg']]
 	 *
-	 * @throws EM_Exception    If there are missing files, an exception is thrown.
 	 * @return bool            True on success, false if no file uploaded
+	 *@throws EM_Exception    If there are missing files, an exception is thrown.
 	 */
-	public static function prepare( $file_key ) {
+	public static function prepare( $file_key, $data = [] ) {
 		// contain the $_REQUEST if we need to
 		if ( is_array($file_key) ) {
 			$request_path = $file_key;
 			$files_key = implode('-', $request_path);
 			$file_key = array_pop( $request_path );
-			$REQUEST = Utils::_request( $request_path );
+			$REQUEST = !empty($data) ? $data : Utils::_request( $request_path );
 			// go throught $the $_FILES array and check if we have this path available, if so, we rename it to the new $files_key so it's not so multi-dimensional
 			if ( empty( $_FILES[$file_key] ) ) {
 				// handle possibility of input field using an array, and make $_FILES an array for validation purposes
@@ -225,7 +226,7 @@ class Uploader {
 			}
 		} else {
 			$files_key = $file_key;
-			$REQUEST = Utils::_request();
+			$REQUEST = !empty($data) ? $data : Utils::_request();
 		}
 		// check fallback or already prepared
 		if ( !empty($_FILES[ $files_key ]) ) {
@@ -302,9 +303,9 @@ class Uploader {
 	 * @throws \EM_Exception
 	 * @return bool Validated file (or files) on success, null if no file is provided, throws error if validation fails.
 	 */
-	public static function validate( $file_key, $options = [] ) {
+	public static function validate( $file_key, $options = [], $data = [] ) {
 		// prepare the files
-		static::prepare( $file_key );
+		static::prepare( $file_key, $data );
 		
 		$files_key = $file_key;
 		if( is_array($file_key) ) {

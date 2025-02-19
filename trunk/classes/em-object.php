@@ -1805,7 +1805,7 @@ class EM_Object {
 		foreach( $raw_meta as $meta ){
 			$meta_value = maybe_unserialize($meta['meta_value']);
 			$meta_key = $meta['meta_key'];
-			if( preg_match('/^_([a-zA-Z\-0-9 _]+)\|([a-zA-Z\-0-9 _]+)?$/', $meta_key, $match) || preg_match('/^_([a-zA-Z\-0-9 _]+)_([^_]+)$/', $meta_key, $match) ){
+			if( preg_match('/^_([a-zA-Z\-0-9 _]+)\|([^\|]+)?$/', $meta_key, $match) || preg_match('/^_([a-zA-Z\-0-9]+)_(.+)$/', $meta_key, $match) ){
 				$key = $match[1];
 				if( empty($processed_meta[$key]) ) $processed_meta[$key] = array();
 				$subkey = isset($match[2]) ? $match[2] : count($processed_meta[$key]); // allows for storing arrays without a key, such as _beverage_choice| can be stored multiple times in a row if key is not relevant

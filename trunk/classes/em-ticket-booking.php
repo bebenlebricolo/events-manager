@@ -206,7 +206,7 @@ class EM_Ticket_Booking extends EM_Object{
 	}
 	
 	/**
-	 * Updates ticket booking meta data without deleting existing records.
+	 * Updates ticket booking meta data without deleting existing records wherever possible
 	 * If no $meta_key is passed, updates all meta from $this->meta.
 	 * If a specific $meta_key is provided, updates/inserts only that key.
 	 *
@@ -224,8 +224,20 @@ class EM_Ticket_Booking extends EM_Object{
 		}
 		
 		if( is_array($meta_value) ){
-			$associative = array_keys($meta_value) !== range(0, count($meta_value) - 1);
 			// we go down one level of array
+			$meta_value_keys = array_keys($meta_value);
+			$associative = $meta_value_keys !== range(0, count($meta_value) - 1);
+			// we need to delete keys not in the current array, if not associative we must delete all values to prevent extra values
+			if ( $associative ) {
+				// Build a regex pattern to match strings like '_{meta_key}|(key1|key2|etc)' exactly, so we can neget these from deletion
+				$regex = '^_' . preg_quote($meta_key, '/') . '\\|(' . implode('|', array_map('preg_quote', $meta_value_keys)) . ')$';
+				$sql = $wpdb->prepare("DELETE FROM " . EM_TICKETS_BOOKINGS_META_TABLE . " WHERE ticket_booking_id=%d AND meta_key LIKE %s AND meta_key NOT REGEXP %s", $this->ticket_booking_id, '_' . $meta_key . '|%', $regex);
+				$wpdb->query($sql);
+			} else {
+				// delete all, since we can't tell by key
+				$wpdb->query( $wpdb->prepare('DELETE FROM '. EM_TICKETS_BOOKINGS_META_TABLE .' WHERE ticket_booking_id=%d AND meta_key LIKE %s', $this->ticket_booking_id, '_'.$meta_key.'|%') );
+			}
+			// now add or update
 			foreach( $meta_value as $subkey => $subvalue ){
 				if( is_array($subvalue) ) $subvalue = serialize($subvalue);
 				$full_meta_key = $associative ? '_'.$meta_key.'|'.$subkey : '_'.$meta_key.'|';
@@ -237,6 +249,7 @@ class EM_Ticket_Booking extends EM_Object{
 				}
 			}
 		}else{
+			// we can just add or update, since there won't be multiple rows/values
 			$existing = $wpdb->get_var( $wpdb->prepare("SELECT meta_value FROM ". EM_TICKETS_BOOKINGS_META_TABLE ." WHERE ticket_booking_id = %d AND meta_key = %s", $this->ticket_booking_id, $meta_key) );
 			if( null !== $existing ){
 				$wpdb->update( EM_TICKETS_BOOKINGS_META_TABLE, array( 'meta_value' => $meta_value ), array( 'ticket_booking_id' => $this->ticket_booking_id, 'meta_key' => $meta_key ) );
