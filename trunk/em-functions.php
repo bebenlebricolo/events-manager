@@ -775,7 +775,9 @@ function em_get_search_form_defaults($base_args = array(), $context = 'events') 
 	if( isset($_REQUEST['geo']) ) $args['geo'] = sanitize_text_field($_REQUEST['geo']);
 	if( isset($_REQUEST['near']) ) $args['near'] = sanitize_text_field(wp_unslash($_REQUEST['near']));
 	if( isset($_REQUEST['em_search']) ) $args['search'] = sanitize_text_field(wp_unslash($_REQUEST['em_search']));
-	if( isset($_REQUEST['category']) ) $args['category'] = sanitize_text_field($_REQUEST['category']);
+	if( isset($_REQUEST['category']) ) {
+		$args['category'] = is_array($_REQUEST['category']) ? sanitize_text_field( implode(', ', $_REQUEST['category']) ) : sanitize_text_field( $_REQUEST['category'] );
+	}
 	if( isset($_REQUEST['country']) ) $args['country'] = sanitize_text_field(wp_unslash($_REQUEST['country']));
 	if( isset($_REQUEST['region']) ) $args['region'] = sanitize_text_field(wp_unslash($_REQUEST['region']));
 	if( isset($_REQUEST['state']) ) $args['state'] = sanitize_text_field(wp_unslash($_REQUEST['state']));

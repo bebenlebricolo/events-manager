@@ -4,8 +4,8 @@ Donate link: https://wp-events-plugin.com
 Tags: events, calendar, tickets, bookings, appointments
 Text Domain: events-manager
 Requires at least: 6.1
-Tested up to: 6.7
-Stable tag: 6.6.4.1
+Tested up to: 6.7.2
+Stable tag: 6.6.4.2
 Requires PHP: 7.0
 License: GPLv2
 
@@ -164,6 +164,14 @@ See our [FAQ](http://wp-events-plugin.com/documentation/faq/) page for helps wit
 18. Grid view for displaying your upcoming events at a glance
 
 == Changelog ==
+
+= 6.6.4.2 =
+* Fixed map display issues when using empty `[locations_map]` and `[events_map]` shortcode.
+* Fixed improper loading of default permitted upload extensions which can cause fatal errors in Pro form builder.
+* Fixed grouped events list pagination breaking due to incorrect AJAX action command.
+* Fixed category searches not persisting between AJAX reloads.
+* Fixed and removed ability to book an event in the trash, reported by Revan Arifio via PatchStack.
+* Fixed breaking change in BuddyBoss groups due to updated function use for BuddyPress integration.
 
 = 6.6.4.1 =
 * Changed `EM_Mailer` so that `send()` can be called statically and non-statically to avoid legacy errors.

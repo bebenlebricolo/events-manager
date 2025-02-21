@@ -67,6 +67,7 @@ add_shortcode('events_gcal', 'em_get_gcal_shortcode');
  */
 function em_get_locations_map_shortcode($args){
 	$args = em_clean_shortcode_args( (array) $args );
+	$args = em_parse_map_args($args);
 	$args['view'] = !empty($args['view']) ? $args['view'] : 'map';
 	ob_start();
 	em_output_locations_view( $args, 'map' );
@@ -83,6 +84,7 @@ add_shortcode('locations-map', 'em_get_locations_map_shortcode'); //deprecate th
  */
 function em_get_events_map_shortcode($args){
 	$args = em_clean_shortcode_args( (array) $args );
+	$args = em_parse_map_args($args);
 	$args['view'] = !empty($args['view']) ? $args['view'] : 'map';
 	ob_start();
 	em_output_events_view( $args, 'map' );

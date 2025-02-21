@@ -260,7 +260,12 @@ class BP_EM_Component extends BP_Component {
 		global $bp;	
 		/* Add some group subnav items */
 		if( bp_is_active('groups') && !empty($bp->groups->current_group) ){
-			$group_link = trailingslashit( bp_get_groups_directory_url() ) . $bp->groups->current_group->slug . '/';
+			if ( function_exists( 'bp_get_groups_directory_url' )  ) {
+				$group_link = trailingslashit( bp_get_groups_directory_url() ) . $bp->groups->current_group->slug . '/';
+			}
+			else {
+				$group_link = $bp->root_domain . '/' . bp_get_groups_root_slug() . '/' . $bp->groups->current_group->slug . '/';
+			}
 			$user_access = $bp->groups->current_group->user_has_access;
 			if( !empty($bp->current_component) && $bp->current_component == 'groups' ){
 				$count = EM_Events::count(array('group'=>$bp->groups->current_group->id));

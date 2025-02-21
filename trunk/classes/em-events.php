@@ -472,7 +472,7 @@ $limit $offset";
 				$default_args['mode'] = get_option('dbem_event_list_groupby');
 				$default_args['header_format'] = get_option('dbem_event_list_groupby_header_format', '<h2>#s</h2>');
 				$default_args['date_format'] = get_option('dbem_event_list_groupby_format','');
-				echo self::get_pagination_links($args, $events_count, 'events_search', $default_args);
+				echo self::get_pagination_links($args, $events_count, 'search_events', $default_args);
 			}
 		}elseif( $args['no_results_msg'] !== false ){
 			echo !empty($args['no_results_msg']) ? $args['no_results_msg'] : get_option('dbem_no_events_message');
