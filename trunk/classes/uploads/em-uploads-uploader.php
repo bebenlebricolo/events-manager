@@ -94,7 +94,7 @@ class Uploader {
 		static::$default_options['max_files'] = get_option('dbem_uploads_max_files');
 		static::$default_options['allow_multiple'] = get_option('dbem_uploads_allow_multiple');
 		static::$default_options['type'] = get_option('dbem_uploads_type');
-		static::$default_options['extensions'] = explode(',', get_option('dbem_uploads_extensions'));
+		static::$default_options['extensions'] = explode(',', str_replace(' ', '', get_option('dbem_uploads_extensions')) );
 
 		static::$default_options['image_min_width'] = get_option('dbem_image_min_width');
 		static::$default_options['image_max_width'] = get_option('dbem_image_max_width');

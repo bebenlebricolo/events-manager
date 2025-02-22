@@ -295,7 +295,7 @@ function em_init_actions_start() {
 			ob_start();
 			if( (!defined('WP_CACHE') || !WP_CACHE) && !isset($GLOBALS["wp_fastest_cache"]) ) em_verify_nonce('booking_add');
 			if( !is_user_logged_in() || get_option('dbem_bookings_double') || !$EM_Event->get_bookings()->has_booking(get_current_user_id()) ){
-				if ( $EM_Event->event_status != 1 ) {
+				if ( $EM_Event->event_status != 1 || $EM_Event->event_active_status != 1 ) {
 					$EM_Notices->add_error( __('This event is not available or has been cancelled', 'events-manager') ); // uncommon, not needed for custom error.
 				} else {
 				    $EM_Booking->get_post();
@@ -334,8 +334,8 @@ function em_init_actions_start() {
 	  	}elseif ( $_REQUEST['action'] == 'booking_add_one' && is_object($EM_Event) && is_user_logged_in() ) {
 			//ADD/EDIT Booking
 			em_verify_nonce('booking_add_one');
-			if ( $EM_Event->event_status != 1 ) {
-				$EM_Notices->add_error( __('This event is not available or has been cancelled', 'events-manager') ); // uncommon, not needed for custom error.
+			if ( $EM_Event->event_status != 1 || $EM_Event->event_active_status != 1 ) {
+				$EM_Notices->add_error( __('This event is not available or has been cancelled.', 'events-manager') ); // uncommon, not needed for custom error.
 			} else {
 				if( get_option('dbem_bookings_double') || !$EM_Event->get_bookings()->has_booking(get_current_user_id()) ){
 					$EM_Booking = em_get_booking(array('person_id'=>get_current_user_id(), 'event_id'=>$EM_Event->event_id, 'booking_spaces'=>1)); //new booking

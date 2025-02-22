@@ -359,6 +359,12 @@ document.addEventListener('em_uploader_ready', function(e) {
 					Object.assign(pondOptions, JSON.parse(inline_options.text));
 				}
 
+				// last cleanup
+				if ( typeof pondOptions.acceptedFileTypes === 'undefined' || pondOptions.acceptedFileTypes.length === 0 ) {
+					pondOptions.allowFileTypeValidation = false;
+
+				}
+
 				// start it up!
 				pond = FilePond.create(input, pondOptions);
 

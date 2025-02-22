@@ -545,7 +545,7 @@ class EM_Booking extends EM_Object{
 		do_action('em_booking_get_post_pre',$this);
 		$result = array();
 		$this->event_id = absint($_REQUEST['event_id']);
-		if ( $this->get_event()->event_status != 1 ) {
+		if ( $this->get_event()->event_status != 1 || $this->get_event()->event_active_status != 1 ) {
 			$this->add_error( __('This event is not available or has been cancelled', 'events-manager') ); // uncommon, not needed for custom error.
 		}
 		if( isset($_REQUEST['em_tickets']) && is_array($_REQUEST['em_tickets']) && ($_REQUEST['em_tickets'] || $override_availability) ){

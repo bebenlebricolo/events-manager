@@ -1496,7 +1496,7 @@ class EM_Object {
 	/**
 	 * Adds an error to the object, if $errors is an array then multiple error strings can be added, WP_Error object will also add all messages.
 	 *
-	 * @param array|WP_Error|EM_Exception $errors
+	 * @param string|array|WP_Error|EM_Exception $errors
 	 *
 	 * @return void
 	 */
