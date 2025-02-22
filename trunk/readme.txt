@@ -5,7 +5,7 @@ Tags: events, calendar, tickets, bookings, appointments
 Text Domain: events-manager
 Requires at least: 6.1
 Tested up to: 6.7.2
-Stable tag: 6.6.4.2
+Stable tag: 6.6.4.3
 Requires PHP: 7.0
 License: GPLv2
 
@@ -164,6 +164,8 @@ See our [FAQ](http://wp-events-plugin.com/documentation/faq/) page for helps wit
 18. Grid view for displaying your upcoming events at a glance
 
 == Changelog ==
+= 6.6.4.3 =
+* Fixed bug in 6.4.4.2 showing events as cancelled when attempting to make a booking
 
 = 6.6.4.2 =
 * Fixed map display issues when using empty `[locations_map]` and `[events_map]` shortcode.
