@@ -353,6 +353,11 @@ document.addEventListener('em_uploader_ready', function(e) {
 					},
 				};
 
+				// pre-override cleanup
+				if ( input.accept ) { // let accept override, unless inline options override
+					delete pondOptions.acceptedFileTypes;
+				}
+
 				// check if there's an options holder
 				let inline_options = wrapper.querySelector('.em-uploader-options');
 				if (inline_options) {
@@ -361,7 +366,7 @@ document.addEventListener('em_uploader_ready', function(e) {
 
 				// last cleanup
 				if ( typeof pondOptions.acceptedFileTypes === 'undefined' || pondOptions.acceptedFileTypes.length === 0 ) {
-					pondOptions.allowFileTypeValidation = false;
+					pondOptions.allowFileTypeValidation = !!input.accept;
 
 				}
 

@@ -1,7 +1,7 @@
 <?php
 /*
 Plugin Name: Events Manager
-Version: 6.6.4.4
+Version: 6.6.4.4.1
 Plugin URI: https://wp-events-plugin.com
 Description: Event registration and booking management for WordPress. Recurring events, locations, webinars, google maps, rss, ical, booking registration and more!
 Author: Pixelite
@@ -29,7 +29,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 */
 
 // Setting constants
-define('EM_VERSION', '6.6.4.4'); //self expanatory, although version currently may not correspond directly with published version number. until 6.0 we're stuck updating 5.999.x
+define('EM_VERSION', '6.6.4.4.1'); //self expanatory, although version currently may not correspond directly with published version number. until 6.0 we're stuck updating 5.999.x
 define('EM_PRO_MIN_VERSION', '3.4'); //self expanatory
 define('EM_PRO_MIN_VERSION_CRITICAL', '3.0'); //self expanatory
 define('EM_DIR', dirname( __FILE__ )); //an absolute path to this directory
@@ -467,8 +467,8 @@ class EM_Scripts_and_Styles {
 			'assets' => [],
 		);
 		// get externals, the externals will be loaded during page init via JS to keep things light
-		$js = static::get_minified_extension_js().'.js';
-		$css = static::get_minified_extension_css().'.css';
+		$js = static::get_minified_extension_js().'.js'.'?v='.EM_VERSION;
+		$css = static::get_minified_extension_css().'.css'.'?v='.EM_VERSION;
 		$js_url = EM_DIR_URI . 'includes/js/';
 		// uploads
 		if( get_option('dbem_uploads_ui') ) {

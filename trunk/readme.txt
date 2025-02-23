@@ -164,6 +164,9 @@ See our [FAQ](http://wp-events-plugin.com/documentation/faq/) page for helps wit
 18. Grid view for displaying your upcoming events at a glance
 
 == Changelog ==
+== 6.6.4.4.1 (dev) ==
+* Fixed uploader validation issues in JS and PHP caused by blank default extensions settings for event/location image uploads
+
 = 6.6.4.4 =
 * Re-added cancellation checks before processing a booking, previously added in 6.6.4.2 and removed in .3 due to urgent validation reports.
 * Fixed image validation issues introduced in 6.6.4.2
