@@ -1130,7 +1130,7 @@ class EM_Bookings_Table extends EM\List_Table {
 	 *
 	 * @return false|string
 	 */
-	public function get_attendees_multiple_col( $attendees_array, $col, $EM_Object ){
+	public function get_attendees_multiple_col( $attendees_array, $col, $EM_Object, $html = false ){
 		ob_start();
 		if( !in_array( $this->format, ['csv', 'xls', 'xlsx'] ) ){
 			if ( $EM_Object instanceof EM_Ticket_Bookings ) {
@@ -1163,7 +1163,11 @@ class EM_Bookings_Table extends EM\List_Table {
 								<?php
 									foreach ( $attendee_data['attendees'] as $attendee_num => $attendee_value ) {
 										echo '<dt>' . esc_html( sprintf( __('Attendee #%d', 'events-manager-pro'), $attendee_num + 1) ) . '</dt>';
-										echo '<dd>' . esc_html($attendee_value) . '</dd>';
+										if ( $html ) {
+											echo '<dd>' . $attendee_value . '</dd>';
+										} else {
+											echo '<dd>' . esc_html($attendee_value) . '</dd>';
+										}
 									}
 								?>
 							</dl>
