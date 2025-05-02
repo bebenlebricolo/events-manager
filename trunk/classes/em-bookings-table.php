@@ -439,7 +439,7 @@ class EM_Bookings_Table extends EM\List_Table {
 		}elseif( !empty($EM_Ticket) && is_object($EM_Ticket) ){
 			return $EM_Ticket;
 		} elseif( !empty($_REQUEST['ticket_id']) ) {
-			$this->ticket_id = new EM_Ticket( $_REQUEST['ticket_id'] );
+			$this->ticket = EM_Ticket::get( $_REQUEST['ticket_id'] );
 			return $this->ticket;
 		}
 		return false;
@@ -505,7 +505,11 @@ class EM_Bookings_Table extends EM\List_Table {
 			$args = array( 'ticket_id' => $EM_Ticket->ticket_id );
 		}elseif( $EM_Event !== false ){
 			//bookings for an event
-			$args = array( 'event' => $EM_Event->event_id );
+			if ( $EM_Event->is_recurring() ) {
+				$args = array( 'recurring_event' => $EM_Event->event_id );
+			} else {
+				$args = array( 'event' => $EM_Event->event_id );
+			}
 			$args['owner'] = !current_user_can('manage_others_bookings') ? get_current_user_id() : false;
 		}else{
 			//all bookings for a status

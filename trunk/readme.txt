@@ -164,7 +164,48 @@ See our [FAQ](http://wp-events-plugin.com/documentation/faq/) page for helps wit
 18. Grid view for displaying your upcoming events at a glance
 
 == Changelog ==
-== 6.6.4.4.2 (dev) ==
+== 7.0.0.0 (beta) ==
+* Added recurring events functionality, which now hosts one page for all events of that recurrence type.
+* Added recurrence booking form picker including a calendar and dropdown selection.
+* Added support for true timezone-relative calendar and recurrence selection listings via the `calendar_timezone` attribute.
+* Added support for searching in timezone-relative scopes for events using the `timezone_scope` attribute.
+* Added admin support for viewing bookings belonging to recurring events.
+* Added conversion features to transfer repeated (previously called "recurring") events into recurring events.
+* Added 302 redirection functionality for converted repeated > recurring events.
+* Moved booking form JS into externally and dynamically loaded JS file.
+* Added month skipping navigation in calendars allowing skipping months with no events.
+* Added multiple calendar UI display tweaks/fixes to eventful and today months.
+* Fixed blank calendar dates showing display dates.
+* Added different calendar header option via the `calendar_header` attribute.
+* Added `setStartOfMonth()` and `setEndOfMonth()` to `EM_DateTime`.
+* Added timezone display options in `EM_DateTime::getDate()` and `getDateTime()` functions.
+* Changed selectize JS to dispatch a `CustomEvent` object from parent element with `detail` containing selectize objects.
+* Post ID is now optional for events.
+* Fixed loading order of translated string assignments so they occur after init, while hard-coding potentially required strings during previously translated actions/filters.
+* Updated readme "tested up to".
+* Namespaced Selectize and the `.selectize()` functions to `EM_Selectize` and `.em_selectize()` respectively to avoid collisions with other plugins.
+* Fixed phone input button styling clashes in manual bookings and potentially other pages.
+* Moved `EM_Scripts_and_Styles` out of `events-manager.php` into its own class.
+* Added `EM\Scripts_and_Styles::add_js_var()` allowing for footer localization.
+* Added `em_wp_localize_script_footer` allowing plugins to override EM localized script vars.
+* Added a catch exception in `EM_DateTime::modify()`.
+* Renamed some PHP variables in overriding methods (minor).
+* Added multi-layer recurrence patterns including exclusions so events can have multiple recurrence patterns.
+* Added `event_type` field allowing for recurrences, repeated, and recurring event types.
+* Changed recurring event saving logic to prevent deletion unless explicitly rescheduled or removed.
+* Added cancellation/deletion options for recurrences not included in newly rescheduled patterns.
+* Improved event update logic so that only new recurrences are added during rescheduling.
+* Changed vocabulary from “recurring events” to “repeating events” for clarity and future compatibility.
+* Updated ticket logic to support recurrence/override patterns while maintaining parent-child relationships.
+* Added `Recurring_Sets` and `Recurring_Set` objects to handle recurrence data.
+* Rewritten recurring event logic for greater flexibility and future extensibility.
+* Added `EM_Ticket::get()` for cache-friendly ticket retrieval.
+* Added `EM_DateTimeZone::getCity()`.
+* Deprecated `recurrence_` fields in `events` table.
+* Added `em_event_recurrences` table.
+* Changed ticket deletion so it requires an event save.
+* Added nonce safeguards for disabling RSVP/bookings, deleting recurrences, and rescheduling tickets.
+* Added `em_datepicker_format()` function to output datepicker format.
 * Fixed uploader validation issues in JS and PHP caused by blank default extensions settings for event/location image uploads.
 * Added non-escape option to allow HTML sub-values in attendees mulitple column data views on bookings table.
 

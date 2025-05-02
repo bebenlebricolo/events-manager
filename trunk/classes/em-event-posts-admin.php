@@ -62,14 +62,27 @@ class EM_Event_Posts_Admin{
 	}
 	
     public static function admin_notices(){
-        if( !empty($_REQUEST['recurrence_id']) && is_numeric($_REQUEST['recurrence_id']) ){
-            $EM_Event = em_get_event( absint($_REQUEST['recurrence_id']) );
-            ?>
-            <div class="notice notice-info">
-                <p><?php echo sprintf(esc_html__('You are viewing individual recurrences of recurring event %s.', 'events-manager'), '<a href="'.$EM_Event->get_edit_url().'">'.$EM_Event->event_name.'</a>'); ?></p>
-                <p><?php esc_html_e('You can edit individual recurrences and disassociate them with this recurring event.', 'events-manager'); ?></p>
-            </div>
-            <?php
+        if( !empty($_REQUEST['recurring_event']) && is_numeric($_REQUEST['recurring_event']) ){
+			$EM_Event = em_get_event( absint($_REQUEST['recurring_event']) );
+			if ( $EM_Event->is_repeating() ) {
+				?>
+				<div class="notice notice-info">
+					<p><?php echo sprintf(esc_html__('You are viewing individual recurrences of %s.', 'events-manager'), '<a href="'.$EM_Event->get_edit_url().'">'.$EM_Event->event_name.'</a>'); ?></p>
+					<p><?php echo sprintf( esc_html__('You can edit individual recurrences and disassociate them with this %s.', 'events-manager'), esc_html__('repeating event', 'events-manager')); ?></p>
+					<?php
+					if ( get_option('dbem_recurrence_enabled') && get_option('dbem_recurrence_convert_enabled') ) {
+						$convert_url = esc_url( add_query_arg( ['action' => 'convert_to_recurrence', 'event_id' => $EM_Event->event_id, 'nonce' => 'x'] ) );
+						$convert_nonce = wp_create_nonce('convert_to_recurrence_'.$EM_Event->event_id);
+						?>
+						<p><?php echo sprintf( esc_html__('You can also %s into a single recurring event.', 'events-manager'), '<a href="'. $convert_url .'" class="em-convert-recurrence-link" data-nonce="' . $convert_nonce . '">'. esc_html__('convert the entire repeating event series', 'events-manager') . '</a>'); ?></p>
+						<?php
+						$warning = esc_html__('This will delete all event recurrence posts/pages, and unify them into one URL. Any 404 pages resulting from these will automatically 302-redirect to the recurring event (which will be a new URL).', 'events-manager');
+						EM\Scripts_and_Styles::add_js_var('convert_recurring_warning', __('Are you sure you want to convert this repeating event?', 'events-manager') . "\n\n" . __('WARNING: This action cannot be undone.', 'events-manager') . "\n\n" . $warning);
+					}
+					?>
+				</div>
+				<?php
+			}
         }
     }
 	
@@ -210,6 +223,9 @@ class EM_Event_Posts_Admin{
 		switch ( $column ) {
 			case 'event-id':
 				echo $EM_Event->event_id;
+				if ( defined('EM_DEBUG') && EM_DEBUG && $EM_Event->is_recurrence() ) {
+					echo ' | Set #' . $EM_Event->recurrence_set_id;
+				}
 				break;
 			case 'location':
 				//get meta value to see if post has location, otherwise
@@ -233,15 +249,24 @@ class EM_Event_Posts_Admin{
 				//get meta value to see if post has location, otherwise
 				$localised_start_date = $EM_Event->start()->i18n(get_option('date_format'));
 				$localised_end_date = $EM_Event->end()->i18n(get_option('date_format'));
+				if( get_option('dbem_event_status_enabled') && $EM_Event->event_active_status === 0 ) {
+					echo '<span class="event-cancelled">';
+				}
 				echo $localised_start_date;
 				echo ($localised_end_date != $localised_start_date) ? " - $localised_end_date":'';
+				if( get_option('dbem_event_status_enabled') && $EM_Event->event_active_status === 0 ) {
+					echo '</span>';
+					echo '<span class="dashicons dashicons-info em-tooltip" style="font-size:16px; color:#ccc; padding-top:2px;" title="'. esc_html__('Cancelled', 'events-manager') .'"></span>';
+				}
 				echo "<br />";
 				if(!$EM_Event->event_all_day){
 					echo $EM_Event->start()->i18n(get_option('time_format')) . " - " . $EM_Event->end()->i18n(get_option('time_format'));
 				}else{
 					echo get_option('dbem_event_all_day_message');
 				}
-				if( $EM_Event->get_timezone()->getName() != EM_DateTimeZone::create()->getName() ) echo '<span class="dashicons dashicons-info" style="font-size:16px; color:#ccc; padding-top:2px;" title="'.esc_attr(str_replace('_', ' ', $EM_Event->event_timezone)).'"></span>';
+				if( $EM_Event->get_timezone()->getName() != EM_DateTimeZone::create()->getName() ) {
+					echo '<span class="dashicons dashicons-info em-tooltip" style="font-size:16px; color:#ccc; padding-top:2px;" title="'.esc_attr(str_replace('_', ' ', $EM_Event->event_timezone)).'"></span>';
+				}
 				break;
 			case 'extra':
 				if( get_option('dbem_rsvp_enabled') == 1 && !empty($EM_Event->event_rsvp) && $EM_Event->can_manage('manage_bookings','manage_others_bookings')){
@@ -255,16 +280,16 @@ class EM_Event_Posts_Admin{
 				}
 				if ( $EM_Event->is_recurrence() && current_user_can('edit_recurring_events','edit_others_recurring_events') ) {
 					$actions = array();
-					if( $EM_Event->get_event_recurrence()->can_manage('edit_recurring_events', 'edit_others_recurring_events') ){
-						$actions[] = '<a href="'. admin_url() .'post.php?action=edit&amp;post='. $EM_Event->get_event_recurrence()->post_id .'">'. esc_html__( 'Edit Recurring Events', 'events-manager'). '</a>';
+					if( $EM_Event->get_recurring_event()->can_manage('edit_recurring_events', 'edit_others_recurring_events') ){
+						$actions[] = '<a href="'. admin_url() .'post.php?action=edit&amp;post='. $EM_Event->get_recurring_event()->post_id .'">'. sprintf( esc_html__( 'Edit %s', 'events-manager'), esc_html__('Repeating Events', 'events-manager')). '</a>';
 						$actions[] = '<a class="em-detach-link" href="'. esc_url($EM_Event->get_detach_url()) .'">'. esc_html__('Detach', 'events-manager') .'</a>';
 					}
-					if( $EM_Event->get_event_recurrence()->can_manage('delete_recurring_events', 'delete_others_recurring_events') ){
-						$actions[] = '<span class="trash"><a class="em-delete-recurrence-link" href="'. get_delete_post_link($EM_Event->get_event_recurrence()->post_id) .'">'. esc_html__('Delete','events-manager') .'</a></span>';
+					if( $EM_Event->get_recurring_event()->can_manage('delete_recurring_events', 'delete_others_recurring_events') ){
+						$actions[] = '<span class="trash"><a class="em-delete-recurrence-link" href="'. get_delete_post_link($EM_Event->get_recurring_event()->post_id) .'">'. esc_html__('Delete','events-manager') .'</a></span>';
 					}
 					?>
 					<strong>
-					<?php echo $EM_Event->get_recurrence_description(); ?>
+					<?php echo $EM_Event->get_recurring_event()->get_recurrence_sets()->get_recurrence_description(); ?>
 					</strong>
 					<?php if( !empty($actions) ): ?>
 					<br >
@@ -326,11 +351,11 @@ class EM_Event_Recurring_Posts_Admin{
 	public static function admin_notices(){
 		?>
 		<div class="notice notice-info">
-			<p><?php esc_html_e( 'Modifications to recurring events will be applied to all recurrences and will overwrite any changes made to those individual event recurrences.', 'events-manager'); ?></p>
+			<p><?php esc_html_e( 'Modifications to repeating events will be applied to all recurrences and will overwrite any changes made to those individual event recurrences.', 'events-manager'); ?></p>
 			<p><?php esc_html_e( 'Bookings to individual event recurrences will be preserved if event times and ticket settings are not modified.', 'events-manager'); ?></p>
 			<p>
 				<a href="<?php echo esc_url( em_get_events_admin_url() ); ?>">
-					<strong><?php esc_html_e('You can edit individual recurrences and disassociate them with a recurring event to prevent getting overwritten.', 'events-manager'); ?></strong>
+					<strong><?php echo sprintf( esc_html__('You can edit individual recurrences and disassociate them with a %s to prevent getting overwritten.', 'events-manager'), esc_html__('repeating event', 'events-manager')); ?></strong>
 				</a>
 	    	</p>
 		</div>
@@ -405,7 +430,7 @@ class EM_Event_Recurring_Posts_Admin{
 					break;
 				case 'date-time':
 					echo $EM_Event->get_recurrence_description();
-					$edit_url = add_query_arg(array('scope'=>'all', 'recurrence_id'=>$EM_Event->event_id), em_get_events_admin_url());
+					$edit_url = add_query_arg(array('scope'=>'all', 'recurring_event'=>$EM_Event->event_id), em_get_events_admin_url());
 					$link_text = sprintf(__('View %s', 'events-manager'), __('Recurrences', 'events-manager'));
 					echo "<br /><span class='row-actions'>
 							<a href='". esc_url($edit_url) ."'>". esc_html($link_text) ."</a>

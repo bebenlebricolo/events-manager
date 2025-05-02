@@ -1371,6 +1371,17 @@ function em_get_date_format(){
 	return get_option('dbem_date_format');
 }
 
+function em_get_datepicker_format() {
+	$format = get_option('dbem_datepicker_format');
+    $map = ['d'=>'d','D'=>'D','l'=>'l','j'=>'j','J'=>'jS','w'=>'w','W'=>'W',
+            'F'=>'F','m'=>'m','n'=>'n','M'=>'M','y'=>'y','Y'=>'Y','H'=>'H',
+            'h'=>'h','G'=>'g','i'=>'i','S'=>'s','s'=>'s','K'=>'A','U'=>'U','Z'=>'c'];
+    return preg_replace_callback('/./', function($m) use ($map) {
+        return isset($map[$m[0]]) ? $map[$m[0]] : '\\'.$m[0];
+    }, $format);
+}
+
+
 /**
  * Backwards compatibility fuction to trigger the deprecated em_bookings_form_footer action if the newly introduced action em_booking_form_buttons_header is fired.
  * This will ensure any previous code using this action will still trigger appropriately, because we can assume the template was replaced with a new one containing em_booking_form_buttons_header and not em_booking_form_footer

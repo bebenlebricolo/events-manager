@@ -67,9 +67,9 @@ class EM_Events extends EM_Object {
 				//get all fields from table, add events table prefix to avoid ambiguous fields from location
 				$selectors = $events_table . '.*';
 			}elseif( EM_MS_GLOBAL ){
-				$selectors = $events_table.'.post_id, '.$events_table.'.blog_id';
+				$selectors = $events_table.'.event_id, '. $events_table.'.post_id , ' . $events_table.'.blog_id';
 			}else{
-				$selectors = $events_table.'.post_id';
+				$selectors = $events_table.'.event_id, '. $events_table.'.post_id';
 			}
 			if( $calc_found_rows ) $selectors = 'SQL_CALC_FOUND_ROWS ' . $selectors; //for storing total rows found
 			$selectors = 'DISTINCT ' . $selectors; //duplicate avoidance
@@ -219,11 +219,19 @@ $limit $offset";
 		
 		if( EM_MS_GLOBAL ){
 			foreach ( $results as $event ){
-				$events[] = em_get_event($event['post_id'], $event['blog_id']);
+				if ( !empty($event['post_id']) ) {
+					$events[] = em_get_event( $event['post_id'], $event['blog_id'] );
+				} else {
+					$events[] = em_get_event( $event['event_id'] );
+				}
 			}
 		}else{
 			foreach ( $results as $event ){
-				$events[] = em_get_event($event['post_id'], 'post_id');
+				if ( !empty($event['post_id']) ) {
+					$events[] = em_get_event( $event['post_id'], 'post_id' );
+				} else {
+					$events[] = em_get_event( $event['event_id'] );
+				}
 			}
 		}
 		
@@ -488,6 +496,20 @@ $limit $offset";
 		}
 		return parent::get_pagination_links($args, $count, $search_action, $default_args);
 	}
+
+	/**
+	 * Adds JavaScript variables to the page load, useful for dynamically loading localized text specifically for the event editor when loaded.
+	 * @return void
+	 */
+	public static function add_editor_js_vars() {
+		$js_vars = [
+			'deleteTicketWarning' => sprintf( esc_html__('Are you sure you want to delete this ticket? All bookings related to this ticket will be deleted once you save this %s.','events-manager'), esc_html__('Event', 'events-manager') ),
+			'deleteTicketParentWarning' => esc_html__('Are you sure you want to delete this ticket?', 'events-manager') . "\n\n" . esc_html__('Tickets within recurrences without any bookings will be deleted.', 'events-manager')  . "\n\n" . esc_html__('Tickets within recurrences that already have bookings WILL NOT be deleted, the ticket will be deactivated instead to prevent further bookings.','events-manager'),
+		];
+		EM\Scripts_and_Styles::add_js_var('eventEditor', $js_vars);
+		// add recurrence set stuff too
+		EM\Recurrences\Recurrence_Sets::add_js_vars();
+	}
 	
 	/* (non-PHPdoc)
 	 * DEPRECATED - this class should just contain static classes,
@@ -535,6 +557,14 @@ $limit $offset";
 				if( empty($skip_location_null_condition) ){
 					$conditions['location_status'] = '('.$conditions['location_status'].' OR '.EM_LOCATIONS_TABLE.'.location_id IS NULL)';
 				}
+			}
+		}
+		// recurrence set
+		if ( !empty($args['recurrence_set']) ){
+			if ( is_numeric( $args['recurrence_set'] ) ){
+				$conditions['recurrence_set'] = "(`recurrence_set_id`=" . absint($args['recurrence_set']).")";
+			} elseif ( static::array_is_numeric( $args['recurrence_set'] ) ){
+				$conditions['recurrence_set'] = "(`recurrence_set_id` IN (" . implode(',', $args['recurrence_set']).") )";
 			}
 		}
 		//search conditions
@@ -711,6 +741,7 @@ $limit $offset";
 	public static function get_default_search( $array_or_defaults = array(), $array = array() ){
 		$defaults = array(
 			'recurring' => false, //we don't initially look for recurring events only events and recurrences of recurring events
+			'recurrence_set' => false, // get a specific set of event recurrences within a recurrence
 			'orderby' => get_option('dbem_events_default_orderby'),
 			'order' => get_option('dbem_events_default_order'),
 			'groupby' => false,
