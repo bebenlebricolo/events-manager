@@ -2,7 +2,7 @@
 // The following are included in the scope of this event date range picker
 /* @var int $id */
 /* @var int $type */
-/* @var EM\Recurrences\Recurrence_Set $Recurrence_Set */
+/* @var EM_Event $EM_Event */
 $can_cancel = get_option('dbem_event_status_enabled') && array_key_exists( 0, EM_Event::get_active_statuses() );
 ?>
 <div class="<?php em_template_classes('recurrence-set-reshedule-modal', 'modal'); ?> only-exclude-type">
@@ -21,7 +21,16 @@ $can_cancel = get_option('dbem_event_status_enabled') && array_key_exists( 0, EM
 			<p><?php echo esc_html( sprintf( __( 'If you modify the dates where recurrences will not occur on, any recurrences falling within these dates will be %s. New recurrences will be created if you remove unavailable dates which previously blocked recurrnce dates.', 'events-manager' ), $consequence ) ); ?></p>
 			<div class="recurrence-reschedule-action reschedule-action-delete-cancel input">
 				<label data-nostyle>
-					<span class="reschedule-warning"><span class="em-icon em-icon-warning"></span> <?php esc_html_e('Modified unavailable dates.', 'events-manager'); ?></span>
+					<span class="reschedule-warning">
+						<span class="em-icon em-icon-warning"></span>
+						<?php
+							if ( count( $EM_Event->get_recurrence_sets()->exclude ) === 0 ) {
+								esc_html_e('You are adding unavailable dates.', 'events-manager');
+							} else {
+								esc_html_e('Modified unavailable dates.', 'events-manager');
+							}
+						?>
+					</span>
 					<?php  if( get_option('dbem_event_status_enabled') && array_key_exists( 0, EM_Event::get_active_statuses() ) ) : ob_start(); ?>
 					<select class="inline" name="recurrences[exclude_reschedule][action]" data-nostyle>
 						<option value="cancel"><?php esc_html_e('Cancelled', 'events-manager') ?></option>

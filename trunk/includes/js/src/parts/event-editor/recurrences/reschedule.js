@@ -155,7 +155,7 @@ document.addEventListener('em_event_editor_recurrences', function( e ) {
 	recurrenceSets.querySelectorAll('.em-add-recurrence-set[data-type="exclude"]').forEach( function( addButton ) {
 		addButton.addEventListener('click', function (e) {
 			if ( recurrenceExcludeSets.querySelectorAll('[data-rescheduled]').length > 0 || !recurrenceSets.dataset.event_id ) {
-				addRecurrence('exclude');
+				addButton.closest('.em-recurrence-type-exclude')?.dispatchEvent( new CustomEvent('addRecurrence', { bubbles: true }) );
 			} else {
 				openModal( recurrenceExcludeModal );
 			}
@@ -174,10 +174,15 @@ document.addEventListener('em_event_editor_recurrences', function( e ) {
 			unlockReschedule( recurrenceExcludeModal.rescheduleButton  )
 			recurrenceSet = recurrenceExcludeModal.rescheduleButton.closest('.em-recurrence-set');
 		} else {
-			recurrenceSet = addRecurrence('exclude');
+			// pass a detail so it is populated by reference
+			let recurrenceTypeSets = recurrenceSets.querySelector('.em-recurrence-type-exclude');
+			recurrenceTypeSets?.dispatchEvent( new CustomEvent('addRecurrence', { bubbles: true }) );
+			recurrenceSet = recurrenceTypeSets?.querySelector('.em-recurrence-set:last-child');
 		}
 		// mark rescheduled, even if it's new because it essentially can reschedule previously created recurrences by negating them
-		recurrenceSet.dataset.rescheduled = '1';
+		if ( recurrenceSet ) {
+			recurrenceSet.dataset.rescheduled = '1';
+		}
 		// move the reschedule action option to the recurrence set to make it visible
 		recurrenceExcludeSets.firstElementChild.after( rescheduleExcludeAction );
 		rescheduleExcludeAction.querySelector('[data-nonce]').disabled = false;
@@ -185,4 +190,10 @@ document.addEventListener('em_event_editor_recurrences', function( e ) {
 		closeModal(recurrenceExcludeModal);
 	});
 
+	// move the cancel warning back to reschedule modal if removing an event results in no exclusions
+	recurrenceSets.addEventListener('updateSetsCount', function() {
+		if ( recurrenceExcludeSets.dataset.count === '0' ) {
+			recurrenceExcludeModal.querySelector('.em-modal-content')?.append( rescheduleExcludeAction );
+		}
+	});
 });

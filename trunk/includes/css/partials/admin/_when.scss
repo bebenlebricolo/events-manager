@@ -378,6 +378,12 @@ Recurrence Sets and Set styling, out here to reduce selector length, and allow d
 		> .recurrence-reschedule-action {
 			margin-bottom: 10px;
 		}
+		&.em-recurrence-type-new {
+			.em-icon-undo {
+				display: none;
+				visibility: hidden;
+			}
+		}
 	}
 
 	// Show warning if corresponding primary recurrence date affects a subsequent recurrence set

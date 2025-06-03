@@ -341,6 +341,11 @@ class EM_Event extends EM_Object{
 	 * @var boolean
 	 */
 	public $just_added_event = false;
+	/**
+	 * If bookings were previously enabled but then disabled, this flag is set to true during the saving process.
+	 * @var boolean
+	 */
+	public $just_disabled_rsvp = false;
 	
 	/* Post Variables - copied out of post object for easy IDE reference */
 	public $ID;
@@ -784,6 +789,7 @@ class EM_Event extends EM_Object{
 				// do not turn off RSVP without confirmation
 				if ( !empty( $_REQUEST['event_rsvp_delete'] ) && wp_verify_nonce( $_REQUEST['event_rsvp_delete'], 'event_rsvp_delete' ) ) {
 					$this->event_rsvp = 0;
+					$this->just_disabled_rsvp = true;
 				}
 			} else {
 				$this->event_rsvp = 0; // absint
@@ -1314,15 +1320,10 @@ class EM_Event extends EM_Object{
 				$this->event_location_deleted->delete();
 			}
 			//Add/Delete Tickets
-			if( $this->event_rsvp == 0 ){
-				if( !$this->just_added_event ){
-					$this->get_bookings()->delete();
-					$this->get_tickets()->delete();
-				}
+			if( $this->just_disabled_rsvp ){
+				$this->get_bookings()->delete();
+				$this->get_tickets()->delete();
 			}elseif( $this->can_manage('manage_bookings','manage_others_bookings') ){
-				if ( $this->is_recurring( true ) ) {
-					// check the recreate bookings flag
-				}
 				if( !$this->get_bookings()->get_tickets()->save() ){
 					$this->add_error( $this->get_bookings()->get_tickets()->get_errors() );
 				}
@@ -2065,11 +2066,11 @@ class EM_Event extends EM_Object{
 		}
 	}
 	
-	function get_edit_url() {
+	function get_edit_url( $to_recurring = true ) {
 		if ( $this->can_manage( 'edit_events', 'edit_others_events' ) ) {
-			$event_id = $this->is_recurrence() ? $this->get_recurring_event()->event_id : $this->event_id;
-			$post_id = $this->is_recurrence() ? $this->get_recurring_event()->post_id : $this->post_id;
-			$blog_id = $this->is_recurrence() ? $this->get_recurring_event()->blog_id : $this->blog_id;
+			$event_id = $this->is_recurrence() && $to_recurring ? $this->get_recurring_event()->event_id : $this->event_id;
+			$post_id = $this->is_recurrence() && $to_recurring ? $this->get_recurring_event()->post_id : $this->post_id;
+			$blog_id = $this->is_recurrence() && $to_recurring ? $this->get_recurring_event()->blog_id : $this->blog_id;
 			if ( EM_MS_GLOBAL && get_site_option( 'dbem_ms_global_events_links' ) && !empty( $blog_id ) && is_main_site() && $blog_id != get_current_blog_id() ) {
 				if ( get_blog_option( $blog_id, 'dbem_edit_events_page' ) ) {
 					$link = em_add_get_params( get_permalink( get_blog_option( $blog_id, 'dbem_edit_events_page' ) ), [ 'action' => 'edit', 'event_id' => $event_id ], false );

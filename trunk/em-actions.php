@@ -136,11 +136,11 @@ function em_init_actions_start() {
 		if ( $_REQUEST['action'] == 'event_duplicate' && wp_verify_nonce($_REQUEST['_wpnonce'],'event_duplicate_'.$EM_Event->event_id) ) {
 			$event = $EM_Event->duplicate();
 			if( $event === false ){
-				$EM_Notices->add_error($EM_Event->errors, true);
+				$EM_Notices->add_error( $EM_Event->errors, true );
 				wp_safe_redirect( em_wp_get_referer() );
 			}else{
-				$EM_Notices->add_confirm($event->feedback_message, true);
-				wp_safe_redirect( $event->get_edit_url() );
+				$EM_Notices->add_confirm( $event->feedback_message, true );
+				wp_safe_redirect( $event->get_edit_url( false ) );
 			}
 			exit();
 		}

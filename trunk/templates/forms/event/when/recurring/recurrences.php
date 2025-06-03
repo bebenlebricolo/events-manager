@@ -15,7 +15,8 @@ $types = [
 ?>
 <div class="em-recurrence-sets" <?php if ( $EM_Event->event_id ) echo 'data-event_id="'.$EM_Event->event_id.'"'; ?>>
 	<?php foreach( $types as $type => $description ): $i = 1; ?>
-		<div class="em-recurrence-type em-recurrence-type-<?php echo $type; ?>" data-count="<?php echo count( $EM_Event->get_recurrence_sets()->{$type} ); ?>" data-index="<?php echo $i; ?>">
+		<?php $type_count = count( $EM_Event->get_recurrence_sets()->{$type} ); ?>
+		<div class="em-recurrence-type em-recurrence-type-<?php echo $type; ?> <?php if ( $type_count === 0 ) echo 'em-recurrence-type-new'; ?>" data-type="<?php echo $type; ?>" data-count="<?php echo $type_count; ?>" data-index="<?php echo $i; ?>">
 			<p><strong><?php echo esc_html($description); ?></strong></p>
 			<div class="em-recurrence-type-sets">
 				<?php foreach( $EM_Event->get_recurrence_sets()->{$type} as $Recurrence_Set ) : ?>

@@ -1418,7 +1418,13 @@ class Recurrence_Set extends EM_Object {
 					$this->save_recurrences_tickets_insert( $ticket_recurrence_data, $EM_Ticket );
 				}
 			}
-			// deleted tickets will be handled by the {@see EM_Ticket::delete()} method
+		} elseif ( !$EM_Event->event_rsvp && $EM_Event->just_disabled_rsvp ) {
+			// RSVP disabled, so we delete bookings for each recurrence
+			foreach ( $this->get_recurrences() as $recurrence ) {
+				$event = em_get_event( $recurrence['event_id'] );
+				$event->get_bookings()->delete();
+				$event->get_tickets()->delete( true );
+			}
 		}
 	}
 

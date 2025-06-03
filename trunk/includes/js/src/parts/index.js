@@ -362,14 +362,15 @@ function em_setup_ui_elements ( $container ) {
 
 /**
  * Unsetup containers with UI elements, primarily useful if intending on duplicating an element which would require re-setup.
- * @param container
+ * @param $container
  */
-function em_unsetup_ui_elements( container ) {
+function em_unsetup_ui_elements( $container ) {
+	let container = $container instanceof jQuery ? $container[0] : $container;
 	em_unsetup_selectize( container );
 	em_unsetup_tippy( container );
 	em_unsetup_datepicker( container );
 	em_unsetup_timepicker( container );
-	em_unsetup_phone_inputs( container )
+	em_unsetup_phone_inputs( container );
 	// let other things hook in
 	document.dispatchEvent( new CustomEvent( 'em_unsetup_ui_elements', { detail: { container : container } } ) );
 }

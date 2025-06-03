@@ -4351,6 +4351,10 @@
 .em .em-recurrence-sets .em-recurrence-type > .recurrence-reschedule-action {
   margin-bottom: 10px;
 }
+.em .em-recurrence-sets .em-recurrence-type.em-recurrence-type-new .em-icon-undo {
+  display: none;
+  visibility: hidden;
+}
 .em .em-recurrence-sets:has(.em-recurrence-set[data-primary][data-rescheduled].has-modified-date-range) .em-recurrence-set:not([data-primary]):not(.has-date-range) .primary-reschedule-override-warning {
   display: inline-block;
   visibility: visible;

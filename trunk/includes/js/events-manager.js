@@ -362,14 +362,15 @@ function em_setup_ui_elements ( $container ) {
 
 /**
  * Unsetup containers with UI elements, primarily useful if intending on duplicating an element which would require re-setup.
- * @param container
+ * @param $container
  */
-function em_unsetup_ui_elements( container ) {
+function em_unsetup_ui_elements( $container ) {
+	let container = $container instanceof jQuery ? $container[0] : $container;
 	em_unsetup_selectize( container );
 	em_unsetup_tippy( container );
 	em_unsetup_datepicker( container );
 	em_unsetup_timepicker( container );
-	em_unsetup_phone_inputs( container )
+	em_unsetup_phone_inputs( container );
 	// let other things hook in
 	document.dispatchEvent( new CustomEvent( 'em_unsetup_ui_elements', { detail: { container : container } } ) );
 }
@@ -728,6 +729,12 @@ document.addEventListener('em_event_editor_recurrences', function( e ) {
 	recurrenceSets.querySelectorAll('.em-add-recurrence-set[data-type="include"]').forEach( function( addButton ){
 		addButton.addEventListener( 'click', () => addRecurrence('include') );
 	});
+	// set up listner to add recurrences, exclude and include, the exclude trigger is in reschedule.js
+	recurrenceSets.querySelectorAll('.em-recurrence-type').forEach( function( recurrenceSetsType ){
+		recurrenceSetsType.addEventListener( 'addRecurrence', function( e ) {
+			e.detail.recurrenceSet = addRecurrence( recurrenceSetsType.dataset.type );
+		});
+	});
 
 	// REMOVE A RECURRENCE RULE
 	recurrenceSets.addEventListener('click', function ( e ) {
@@ -1012,7 +1019,7 @@ document.addEventListener('em_event_editor_recurrences', function( e ) {
 	recurrenceSets.querySelectorAll('.em-add-recurrence-set[data-type="exclude"]').forEach( function( addButton ) {
 		addButton.addEventListener('click', function (e) {
 			if ( recurrenceExcludeSets.querySelectorAll('[data-rescheduled]').length > 0 || !recurrenceSets.dataset.event_id ) {
-				addRecurrence('exclude');
+				addButton.closest('.em-recurrence-type-exclude')?.dispatchEvent( new CustomEvent('addRecurrence', { bubbles: true }) );
 			} else {
 				openModal( recurrenceExcludeModal );
 			}
@@ -1031,10 +1038,15 @@ document.addEventListener('em_event_editor_recurrences', function( e ) {
 			unlockReschedule( recurrenceExcludeModal.rescheduleButton  )
 			recurrenceSet = recurrenceExcludeModal.rescheduleButton.closest('.em-recurrence-set');
 		} else {
-			recurrenceSet = addRecurrence('exclude');
+			// pass a detail so it is populated by reference
+			let recurrenceTypeSets = recurrenceSets.querySelector('.em-recurrence-type-exclude');
+			recurrenceTypeSets?.dispatchEvent( new CustomEvent('addRecurrence', { bubbles: true }) );
+			recurrenceSet = recurrenceTypeSets?.querySelector('.em-recurrence-set:last-child');
 		}
 		// mark rescheduled, even if it's new because it essentially can reschedule previously created recurrences by negating them
-		recurrenceSet.dataset.rescheduled = '1';
+		if ( recurrenceSet ) {
+			recurrenceSet.dataset.rescheduled = '1';
+		}
 		// move the reschedule action option to the recurrence set to make it visible
 		recurrenceExcludeSets.firstElementChild.after( rescheduleExcludeAction );
 		rescheduleExcludeAction.querySelector('[data-nonce]').disabled = false;
@@ -1042,6 +1054,12 @@ document.addEventListener('em_event_editor_recurrences', function( e ) {
 		closeModal(recurrenceExcludeModal);
 	});
 
+	// move the cancel warning back to reschedule modal if removing an event results in no exclusions
+	recurrenceSets.addEventListener('updateSetsCount', function() {
+		if ( recurrenceExcludeSets.dataset.count === '0' ) {
+			recurrenceExcludeModal.querySelector('.em-modal-content')?.append( rescheduleExcludeAction );
+		}
+	});
 });
 
 // This file deals with dates and times of the main event, determining the overall recurrence duration in dates and times of the recurring event for display purposes.

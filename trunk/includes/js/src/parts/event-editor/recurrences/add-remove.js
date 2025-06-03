@@ -61,6 +61,12 @@ document.addEventListener('em_event_editor_recurrences', function( e ) {
 	recurrenceSets.querySelectorAll('.em-add-recurrence-set[data-type="include"]').forEach( function( addButton ){
 		addButton.addEventListener( 'click', () => addRecurrence('include') );
 	});
+	// set up listner to add recurrences, exclude and include, the exclude trigger is in reschedule.js
+	recurrenceSets.querySelectorAll('.em-recurrence-type').forEach( function( recurrenceSetsType ){
+		recurrenceSetsType.addEventListener( 'addRecurrence', function( e ) {
+			e.detail.recurrenceSet = addRecurrence( recurrenceSetsType.dataset.type );
+		});
+	});
 
 	// REMOVE A RECURRENCE RULE
 	recurrenceSets.addEventListener('click', function ( e ) {
