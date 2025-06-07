@@ -884,7 +884,7 @@ class Recurrence_Set extends EM_Object {
 						$matching_days = $this->get_recurrence_days();
 						$filtered_events = $this->filter_current_recurrences( $matching_days );
 						// if there are no matches, then this was probably created previously but either there's no matches, or more likely recurrences are excluded
-						if ( $filtered_events['matched'] ) {
+						if ( !$filtered_events['matched'] ) {
 							// matches found, but no events existing yet, so we force a reschedule
 							$this->set_reschedule( true );
 						}

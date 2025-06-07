@@ -149,6 +149,7 @@ document.addEventListener('em_event_editor_recurrences', function( e ) {
 		}
 
 		// listen for all-day checkbox changes within the non-primary recurrences
+		let primaryCb = recurrenceSets.querySelector('.em-recurrence-set[data-primary] .em-time-all-day');
 		if ( e.target.matches('.em-time-all-day') ) {
 			let cb = e.target;
 			if ( cb.matches('.em-recurrence-set[data-primary] .em-time-all-day') ) {
@@ -160,7 +161,7 @@ document.addEventListener('em_event_editor_recurrences', function( e ) {
 				if ( cb.readOnly ) {
 					cb.checked = true;
 					cb.readOnly = false;
-				} else if ( cb.checked ) {
+				} else if ( cb.checked && primaryCb.checked ) {
 					cb.readOnly = true
 					cb.indeterminate = true;
 					// unset both times
@@ -246,7 +247,7 @@ document.addEventListener('em_event_editor_recurrences', function( e ) {
 				emRecurrenceEditor.updateDurationDescriptor( recurrenceSet );
 
 				// Update elements with direct one-liners
-				if ( dateValues.length === 4 ) {
+				if ( Object.entries(dateValues).length === 4 ) {
 					advancedSummary.querySelectorAll('.start-date').forEach(el => { el.textContent = dateValues.start; el.classList.toggle('is-set', dateValues.startIsSet); });
 					advancedSummary.querySelectorAll('.end-date').forEach(el => { el.textContent = dateValues.end; el.classList.toggle('is-set', dateValues.endIsSet); });
 				} else {

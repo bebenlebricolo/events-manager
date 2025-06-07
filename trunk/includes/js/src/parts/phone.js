@@ -720,7 +720,7 @@ if ( EM.phone ) {
 
 	em_unsetup_phone_inputs = function( container ) {
 		container.querySelectorAll( 'input.em-phone-intl[type="tel"]' ).forEach( function(el){
-			let iti = EM.intlTelInput.getInstance(el);
+			let iti = EM.intlTelInput?.getInstance(el);
 			if ( iti ) {
 				iti.destroy();
 			}

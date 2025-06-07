@@ -385,12 +385,17 @@ class EM_Ticket extends EM_Object {
 				$this->errors[] = __('There was a problem saving the ticket.', 'events-manager');
 			}
 			$this->compat_keys();
-			return apply_filters('em_ticket_save', ( count($this->errors) == 0 ), $this);
+			$result = count($this->errors) == 0;
 		}else{
 			$this->feedback_message = __('There was a problem saving the ticket.', 'events-manager');
 			$this->errors[] = __('There was a problem saving the ticket.', 'events-manager');
-			return apply_filters('em_ticket_save', false, $this);
+			$result = false;
 		}
+		$result = apply_filters('em_ticket_save', $result, $this);
+		if ( $result ) {
+			wp_cache_set( $this->ticket_id, $this, 'em_tickets' );
+		}
+		return $result;
 	}
 
 	/**

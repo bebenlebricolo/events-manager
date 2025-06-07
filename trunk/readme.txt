@@ -164,7 +164,7 @@ See our [FAQ](http://wp-events-plugin.com/documentation/faq/) page for helps wit
 18. Grid view for displaying your upcoming events at a glance
 
 == Changelog ==
-== 7.0.0.0 (beta) ==
+== 7.0 (RC1) ==
 * Added recurring events functionality, which now hosts one page for all events of that recurrence type.
 * Added recurrence booking form picker including a calendar and dropdown selection.
 * Added support for true timezone-relative calendar and recurrence selection listings via the `calendar_timezone` attribute.
@@ -208,6 +208,14 @@ See our [FAQ](http://wp-events-plugin.com/documentation/faq/) page for helps wit
 * Added `em_datepicker_format()` function to output datepicker format.
 * Fixed uploader validation issues in JS and PHP caused by blank default extensions settings for event/location image uploads.
 * Added non-escape option to allow HTML sub-values in attendees mulitple column data views on bookings table.
+* Removed JS requirement for asset selectors to be wrapped by `em` in dynamic asset loading.
+* Improved dynamic asset loading by pre-loading asset groups before firing `onload` events.
+* Improved booking form JS by encapsulating container scopes within functions and events rather than scoping at the document level.
+* Fixed phone input field JS error.
+* Fixed missing uploader field minified CSS files.
+* Fixed calendars showing the wrong month when there's a long event starting in an earlier month.
+* Fixed ticket caching issue when saving events, which caused the event editor/page to show outdated ticket data such as prices.
+* Added `EM_Event->just_disabled_rsvp` to detect RSVP being disabled during an event save process.
 
 = 6.6.4.4 =
 * Re-added cancellation checks before processing a booking, previously added in 6.6.4.2 and removed in .3 due to urgent validation reports.

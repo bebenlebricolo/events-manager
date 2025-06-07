@@ -265,7 +265,7 @@ class Scripts_and_Styles {
 		/* // timepicker v2 - WIP
 		$em_localized_js['assets']['.em-time-range'] = [
 			'js' => [
-				'timepicker-js' => ['url' => 'timepicker-js/timepicker'.$js, 'required' => true, 'event' => 'em_timepicker_ready'],
+				'timepicker-js' => ['url' => 'timepicker-js/timepicker'.$js, 'event' => 'em_timepicker_ready'],
 			],
 			'css' => [
 				'timepicker-js' => 'timepicker-js/timepicker'.$css,
@@ -277,7 +277,7 @@ class Scripts_and_Styles {
 			$em_localized_js['assets']['input.em-uploader'] = [
 				// each type has key for id of script/link (prefixed automatically by -css/js) and either url or for JS possible array of url and event fired onload for script, third value can also be a locale
 				'js' => [
-					'em-uploader' => ['url' => $js_url.'em-uploader'.$js, 'required' => true],
+					'em-uploader' => ['url' => $js_url.'em-uploader'.$js, 'event' => 'em_uploader_ready', 'requires' => 'filepond'],
 					'filepond-validate-size' => 'filepond/plugins/filepond-plugin-file-validate-size'.$js,
 					'filepond-validate-type' => 'filepond/plugins/filepond-plugin-file-validate-type'.$js,
 					//'filepond-image-preview' => 'filepond/plugins/filepond-plugin-image-preview'.$js, // replaced by our overlay function
@@ -288,7 +288,7 @@ class Scripts_and_Styles {
 					'filepond-plugin-image-thumbnail' => 'filepond/plugins/filepond-plugin-image-thumbnail'.$js,
 					'filepond-plugin-pdf-preview-overlay' => 'filepond/plugins/filepond-plugin-pdf-preview-overlay'.$js,
 					'filepond-plugin-file-icon' => 'filepond/plugins/filepond-plugin-file-icon'.$js,
-					'filepond' => [ 'url' => 'filepond/filepond'.$js, 'event' => 'em_uploader_ready', 'locale' => preg_match('/^en/i', EM_ML::$wplang) ? '' : strtolower(str_replace('_', '-', EM_ML::$wplang)) ],
+					'filepond' => [ 'url' => 'filepond/filepond'.$js, 'locale' => preg_match('/^en/i', EM_ML::$wplang) ? '' : strtolower(str_replace('_', '-', EM_ML::$wplang)) ],
 					//'cropperjs' => 'cropper/cropper'.$js
 				],
 				'css' => [
@@ -320,7 +320,7 @@ class Scripts_and_Styles {
 		} else {
 			$em_localized_js['assets']['input.em-uploader'] = [
 				// each type has key for id of script/link (prefixed automatically by -css/js) and either url or for JS possible array of url and event fired onload for script, third value can also be a locale
-				'js' => [ 'em-uploader' => ['url' => $js_url.'em-uploader'.$js, 'required' => true, 'event' => 'em_uploader_ready'] ],
+				'js' => [ 'em-uploader' => ['url' => $js_url.'em-uploader'.$js, 'event' => 'em_uploader_ready'] ],
 			];
 		}
 		// timezone support via Luxon.js
@@ -334,7 +334,9 @@ class Scripts_and_Styles {
 			'js' => [
 				'em-bookings' => ['url' => $js_url.'bookingsform'.$js, 'event' => 'em_booking_form_js_loaded' ],
 			],
-		]);
+		], $js_url, $js);
+		// let other plugins add EM JS/CSS assets
+		$em_localized_js['assets'] = apply_filters( 'em_enqueue_assets', $em_localized_js['assets'] );
 		// add phone number validation and localization
 		if( Phone::is_enabled() ) {
 			$em_localized_js['phone'] = array(

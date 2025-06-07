@@ -465,13 +465,13 @@ var em_ajaxify = function(url){
 };
 
 // load externals after DOM load, supplied by EM.assets, only if selector matches
-var em_setup_scripts = function(){
+var em_setup_scripts = function( $container = false ) {
+	let container = $container || document;
 	if( EM && 'assets' in EM ) {
 		let baseURL = EM.url + '/includes/external/';
 		for ( const [selector, assets] of Object.entries(EM.assets) ) {
 			// load scripts if one element exists for selector
-			let els = document.querySelector('.em ' + selector);
-			if (els) {
+			if ( container.querySelector(selector) ) {
 				if ('css' in assets) {
 					// Iterate through assets.css object and add stylesheet to head
 					for (const [id, value] of Object.entries(assets.css)) {
@@ -489,18 +489,43 @@ var em_setup_scripts = function(){
 					}
 				}
 				if ('js' in assets) {
+					// add a tracking of all assets to load, and execute loaded hooks after all assets are loaded and in order of dependence
+					let loaded = {};
+					let loadedListener = function( id ) {
+						loaded[id] = false;
+						if ( Object.entries( loaded ).length === Object.entries( assets.js ).length ) {
+							// all items for this asset loaded, so we go through all the entries and fire their events
+							for ( id of Object.keys( loaded ) ) {
+								loadAsset( id )
+							}
+						}
+					};
+					let loadAsset = function( id ) {
+						if ( !loaded[id] ) {
+							let asset = assets.js[id];
+							if ( typeof asset === 'object' && 'event' in asset ) {
+								if ( asset?.requires) {
+									loadAsset( asset.requires );
+								}
+								document.dispatchEvent( new CustomEvent( asset.event, {
+									detail: {
+										container: container,
+									}
+								} ) );
+							}
+							loaded[id] = true;
+						}
+					};
 					// Iterate through assets.js object and add script to head
-					for (const [id, value] of Object.entries(assets.js)) {
+					for ( const [ id, value ] of Object.entries(assets.js)) {
 						// Check if the script with the given ID already exists
-						if (!document.getElementById( id + '-js' )) {
+						if ( !document.getElementById( id + '-js' ) ) {
 							// Create a new script element for the JavaScript file
 							const script = document.createElement('script');
 							script.id = id + '-js';
 							script.async = true;
 							if ( typeof value === 'object' ) {
-								if( 'event' in value ) {
-									script.onload = function() { document.dispatchEvent( new CustomEvent(value.event) ) };
-								}
+								// add locale data
 								if ( 'locale' in value && value.locale ) {
 									script.dataset.locale = value.locale;
 								}
@@ -508,7 +533,9 @@ var em_setup_scripts = function(){
 							} else {
 								script.src = value.match(/^http/g) ? value : baseURL + value;
 							}
-
+							// listen for loads so we execute the real onload hooks once all files are loaded (or errorred out)
+							script.onload = () => loadedListener(id);
+							script.onerror = () => loadedListener(id);
 							// Append the script to the document head
 							document.head.appendChild(script);
 						}
@@ -518,7 +545,7 @@ var em_setup_scripts = function(){
 		}
 	}
 }
-document.addEventListener('DOMContentLoaded', em_setup_scripts);
+document.addEventListener('DOMContentLoaded', () => em_setup_scripts( document ));
 
 document.addEventListener('DOMContentLoaded', function() {
 
@@ -1787,6 +1814,7 @@ document.addEventListener('em_event_editor_recurrences', function( e ) {
 		}
 
 		// listen for all-day checkbox changes within the non-primary recurrences
+		let primaryCb = recurrenceSets.querySelector('.em-recurrence-set[data-primary] .em-time-all-day');
 		if ( e.target.matches('.em-time-all-day') ) {
 			let cb = e.target;
 			if ( cb.matches('.em-recurrence-set[data-primary] .em-time-all-day') ) {
@@ -1798,7 +1826,7 @@ document.addEventListener('em_event_editor_recurrences', function( e ) {
 				if ( cb.readOnly ) {
 					cb.checked = true;
 					cb.readOnly = false;
-				} else if ( cb.checked ) {
+				} else if ( cb.checked && primaryCb.checked ) {
 					cb.readOnly = true
 					cb.indeterminate = true;
 					// unset both times
@@ -1884,7 +1912,7 @@ document.addEventListener('em_event_editor_recurrences', function( e ) {
 				emRecurrenceEditor.updateDurationDescriptor( recurrenceSet );
 
 				// Update elements with direct one-liners
-				if ( dateValues.length === 4 ) {
+				if ( Object.entries(dateValues).length === 4 ) {
 					advancedSummary.querySelectorAll('.start-date').forEach(el => { el.textContent = dateValues.start; el.classList.toggle('is-set', dateValues.startIsSet); });
 					advancedSummary.querySelectorAll('.end-date').forEach(el => { el.textContent = dateValues.end; el.classList.toggle('is-set', dateValues.endIsSet); });
 				} else {
@@ -6226,7 +6254,7 @@ if ( EM.phone ) {
 
 	em_unsetup_phone_inputs = function( container ) {
 		container.querySelectorAll( 'input.em-phone-intl[type="tel"]' ).forEach( function(el){
-			let iti = EM.intlTelInput.getInstance(el);
+			let iti = EM.intlTelInput?.getInstance(el);
 			if ( iti ) {
 				iti.destroy();
 			}

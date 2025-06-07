@@ -3,9 +3,9 @@ document.querySelectorAll('#em-booking-form').forEach( el => el.classList.add('e
 
 // Add event listeners
 var em_booking_form_observer;
-document.addEventListener("em_booking_form_js_loaded", function() {
-
-	document.querySelectorAll('form.em-booking-form').forEach( function( booking_form ){
+document.addEventListener("em_booking_form_js_loaded", function( e ) {
+	let container = e.detail.container;
+	container.querySelectorAll('form.em-booking-form').forEach( function( booking_form ){
 		// backwards compatibility tweaks
 		if( !('id' in booking_form.dataset) ){
 			// find event id and give some essential ids
@@ -35,15 +35,17 @@ document.addEventListener("em_booking_form_js_loaded", function() {
 				}
 			});
 		});
-		em_booking_form_observer.observe( document, { childList: true, attributes: false, subtree: true, } );
+		em_booking_form_observer.observe( container, { childList: true, attributes: false, subtree: true, } );
 	}
 
 	// add a listener to close the recurring booking picker upon a successful booking
-	document.addEventListener( 'em_booking_success', ( e ) => {
+	container.addEventListener( 'em_booking_success', ( e ) => {
 		if ( e.detail.response.success ) {
 			e.currentTarget.closest('.em-booking-recurrence-form')?.querySelector( '.em-booking-recurrence-picker' )?.classList.add( 'hidden' );
 		}
 	});
+
+	em_init_booking_recurring_form( container );
 });
 
 var em_init_booking_recurring_form = function( container ) {
@@ -53,17 +55,16 @@ var em_init_booking_recurring_form = function( container ) {
 		return fetch( EM.bookingajaxurl, {
 			method: "POST",
 			body: data
-		})
-			.then(function(response) {
-				if (response.ok) {
-					return responseType === 'json' ? response.json() : response.text();
-				}
-				return Promise.reject(response);
-			});
+		}).then( function(response) {
+			if (response.ok) {
+				return responseType === 'json' ? response.json() : response.text();
+			}
+			return Promise.reject(response);
+		});
 	}
 
 	let breakpoints = { 'xsmall': 425, 'small' : 650, 'medium' : 890, 'large' : false }
-	EM_ResizeObserver( breakpoints, document.querySelectorAll( '.em-booking-recurrence-picker' ) );
+	EM_ResizeObserver( breakpoints, container.querySelectorAll( '.em-booking-recurrence-picker' ) );
 
 	// handle the booking calendar for recurring events
 	container.querySelectorAll('.em-booking-recurring').forEach( function( recurringBooking ){
@@ -96,7 +97,7 @@ var em_init_booking_recurring_form = function( container ) {
 				e.preventDefault();
 				if ( !gettingRecurrences ) {
 					let date = e.target.closest('.em-cal-day-date');
-					if ( recurrenceDates.dataset.date !== date?.dataset.date ) {
+					if ( date && recurrenceDates.dataset.date !== date?.dataset.date ) {
 						// select this date, all others no
 						date.closest('.em-cal-body').querySelectorAll('.em-cal-day-date').forEach( calDate => calDate.classList.toggle( 'selected', calDate === date ) );
 						gettingRecurrences = getDateRecurrences( date?.dataset.date ).finally( () => { gettingRecurrences = null } );
@@ -128,7 +129,7 @@ var em_init_booking_recurring_form = function( container ) {
 					} else if ( skeletonRecurrenceDates.length < count ) {
 						let templateDate = skeletonRecurrenceDates[0];
 						for ( let i = skeletonRecurrenceDates.length; i < count; i++ ) {
-							skeleton.querySelector( '.em-booking-recurrences' ).append( templateDate.cloneNode( true ) );
+							skeleton.querySelector( '.em-booking-recurrence' ).append( templateDate.cloneNode( true ) );
 						}
 					}
 
@@ -243,7 +244,7 @@ var em_init_booking_recurring_form = function( container ) {
 						let bookingForm = recurrenceBooking.querySelector('form.em-booking-form');
 						if ( bookingForm) {
 							em_setup_ui_elements( bookingForm );
-							em_setup_scripts();
+							em_setup_scripts( bookingForm );
 							em_booking_form_init( bookingForm );
 						}
 					})
@@ -299,7 +300,7 @@ var em_init_booking_recurring_form = function( container ) {
 		    }
 		};
 		// Track hash links being clicked
-		document.addEventListener('click', function(e) {
+		container.addEventListener('click', function(e) {
 		    if ( e.target.closest('a[href^="#"]') ) {
 		        window.lastClickedHashLink = true;
 		        // Reset flag after short delay in case hashchange event doesn't trigger
@@ -315,7 +316,6 @@ var em_init_booking_recurring_form = function( container ) {
 
 	});
 };
-em_init_booking_recurring_form( document );
 
 var em_booking_form_count_spaces = function( booking_form ){
 	// count spaces booked, if greater than 0 show booking form
@@ -429,7 +429,7 @@ var em_booking_form_add_message = function( booking_form, content = null, opts =
 	}
 }
 
-var em_booking_form_add_error = function ( booking_form, error, opts ) {
+var em_booking_form_add_error = function ( booking_form, error, opts = {} ) {
 	let options = Object.assign({
 		type : 'error',
 	}, opts);
@@ -485,7 +485,7 @@ var em_booking_form_hide_success = function( booking_form, opts = {} ){
 	}));
 	// hide login
 	if ( options.hideLogin ) {
-		document.querySelectorAll('.em-booking-login').forEach( login => login.classList.add('hidden') );
+		booking_form.parentElement.querySelectorAll('.em-login').forEach( login => login.classList.add('hidden') );
 	}
 }
 
@@ -508,7 +508,7 @@ var em_booking_form_unhide_success = function( booking_form, opts = {} ){
 	}));
 	// hide login
 	if ( options.showLogin ) {
-		document.querySelectorAll('.em-booking-login').forEach( login => login.classList.add('hidden') );
+		booking_form.parentElement.querySelectorAll('.em-booking-login').forEach( login => login.classList.add('hidden') );
 	}
 };
 
@@ -615,7 +615,7 @@ var em_booking_form_update_booking_intent = function( booking_form, booking_inte
 
 var em_booking_summary_ajax_promise;
 var em_booking_summary_ajax = async function ( booking_form ){
-	let summary_section = document.getElementById('em-booking-form-section-summary-' + booking_form.dataset.id);
+	let summary_section = booking_form.querySelector('.em-booking-form-section-summary');
 	let summary;
 	if( summary_section ) {
 		summary = summary_section.querySelector('.em-booking-form-summary');
@@ -779,7 +779,7 @@ var em_booking_form_submit = function( booking_form, opts = {} ){
 }
 
 var em_booking_form_submit_start = function( booking_form ){
-	document.querySelectorAll('.em-booking-message').forEach( message => message.remove() );
+	booking_form.querySelectorAll('.em-booking-message').forEach( message => message.remove() );
 	em_booking_form_show_spinner( booking_form );
 	let booking_intent = booking_form.querySelector('input.em-booking-intent');
 	let button = booking_form.querySelector( 'input.em-form-submit' );

@@ -1088,7 +1088,7 @@ class EM_Event extends EM_Object{
 			}
 		}
 		//Overwrite new post info
-		$post_array['post_type'] = $this->is_recurring(true) ? 'event-recurring' : EM_POST_TYPE_EVENT;
+		$post_array['post_type'] = $this->is_repeating() ? 'event-recurring' : EM_POST_TYPE_EVENT;
 		$post_array['post_title'] = $this->event_name;
 		$post_array['post_content'] = !empty($this->post_content) ? $this->post_content : '';
 		$post_array['post_excerpt'] = $this->post_excerpt;
@@ -1399,6 +1399,16 @@ class EM_Event extends EM_Object{
 			do_action('em_event_duplicate_pre', $EM_Event, $this);
 			$EM_Event->duplicated = true;
 			$EM_Event->force_status = 'draft';
+			// Is this a repeated/recurring event? If so, we need to save recurrence patterns too
+			if ( $this->is_recurring( true ) ) {
+				$EM_Event->recurrence_sets = clone $this->get_recurrence_sets();
+				foreach ( $EM_Event->recurrence_sets->include as $Recurrence_Set ) {
+					$Recurrence_Set->recurrence_set_id = null;
+				}
+				foreach ( $EM_Event->recurrence_sets->exclude as $Recurrence_Set ) {
+					$Recurrence_Set->recurrence_set_id = null;
+				}
+			}
 			if( $EM_Event->save() ){
 				$EM_Event->feedback_message = sprintf(__("%s successfully duplicated.", 'events-manager'), __('Event','events-manager'));
 				//save tags here - eventually will be moved into part of $this->save();

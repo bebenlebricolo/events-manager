@@ -67,13 +67,19 @@ class EM_Calendar extends EM_Object {
 			if( !isset($month) ){
 				// if empty_month is defined, we first check the next future event and show that month
 				if ( empty($args['empty_months']) ) {
-					$months_args = array_merge( $args, [ 'limit' => 1, 'array' => true, 'month' => false, 'year' => false, 'scope' => 'future', 'orderby' => 'event_start_date', 'order' => 'ASC' ] );
+					$months_args = array_merge( $args, [ 'limit' => 1, 'month' => false, 'year' => false, 'scope' => 'future', 'orderby' => 'event_start_date', 'order' => 'ASC' ] );
+					add_filter( 'pre_option_dbem_events_current_are_past', empty($args['long_events']) ? '__return_true' : '__return_false' );
 					$events = EM_Events::get( $months_args );
+					remove_filter( 'pre_option_dbem_events_current_are_past', empty($args['long_events']) ? '__return_true' : '__return_false' );
 					if ( $events ) {
-						$event = current($events);
-						$dates = preg_match('/([0-9]{4})\-([0-9]{2})\-[0-9]{2}/', $event['event_start_date'], $matches);
-						$month = $args['month'] = $matches[2];
-						$year = $args['year'] = $matches[1];
+						$EM_Event = current($events);
+						if ( $EM_Event->start() < $today ) {
+							$month = (int) $today->format('m');
+							$year = (int) $today->format('Y');
+						} else {
+							$month = (int) $EM_Event->start()->format('m');
+							$year = (int) $EM_Event->start()->format('Y');
+						}
 					}
 				}
 				if( !isset($month) ){
@@ -323,7 +329,7 @@ class EM_Calendar extends EM_Object {
 						$event_eventful_date = $event_start->getDate();
 						if( empty($eventful_days_count[$event_eventful_date]) || !$limit || $eventful_days_count[$event_eventful_date] < $limit ){
 							//now we know this is an event that'll be used, convert it to an object
-							$EM_Event = EM_MS_GLOBAL ? em_get_event($event['post_id'], $event['blog_id']) : $EM_Event = em_get_event($event['post_id'], 'post_id');
+							$EM_Event = em_get_event($event['event_id']);
 							if( empty($eventful_days[$event_eventful_date]) || !is_array($eventful_days[$event_eventful_date]) ) $eventful_days[$event_eventful_date] = array();
 							//add event to array with a corresponding timestamp for sorting of times including long and all-day events
 							$event_ts_marker = ($EM_Event->event_all_day || ($EM_Event->event_start_date != $EM_Event->event_end_date)) ? 0 : (int) $event_start->getTimestamp();
@@ -416,12 +422,20 @@ class EM_Calendar extends EM_Object {
 			$months_args = array_merge( $args, [ 'limit' => 1, 'array' => false, 'month' => false, 'year' => false ] );
 			if ( empty($day_key) || (int) $EM_DateTime->format('m') === (int) $month ) {
 				$months_args = array_merge( $months_args, [ 'scope' => [ $EM_DateTime->setEndOfMonth()->add('P1D')->getDate(), false ], 'orderby' => 'event_start_date', 'order' => 'ASC' ] );
+				add_filter( 'pre_option_dbem_events_current_are_past', empty($args['long_events']) ? '__return_true' : '__return_false' );
 				$events = EM_Events::get( $months_args );
+				remove_filter( 'pre_option_dbem_events_current_are_past', empty($args['long_events']) ? '__return_true' : '__return_false' );
 				if ( $events ) {
 					// we have a date
 					$EM_Event = current($events);
-					$month_next = (int) $EM_Event->start()->format('m');
-					$year_next = (int) $EM_Event->start()->format('Y');
+					if ( $EM_Event->start() < $EM_DateTime ) {
+						// we assume this is a long event if it was in the results since we searched for events next month
+						$month_next = (int) $EM_DateTime->format('m');
+						$year_next = (int) $EM_DateTime->format('Y');
+					} else {
+						$month_next = (int) $EM_Event->start()->format('m');
+						$year_next = (int) $EM_Event->start()->format('Y');
+					}
 				} else {
 					// no upcoming events
 					$month_next = false;
