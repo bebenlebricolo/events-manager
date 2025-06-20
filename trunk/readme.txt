@@ -5,7 +5,7 @@ Tags: events, calendar, tickets, bookings, appointments
 Text Domain: events-manager
 Requires at least: 6.1
 Tested up to: 6.8
-Stable tag: 6.6.4.4
+Stable tag: 7.0.1
 Requires PHP: 7.0
 License: GPLv2
 
@@ -164,7 +164,7 @@ See our [FAQ](http://wp-events-plugin.com/documentation/faq/) page for helps wit
 18. Grid view for displaying your upcoming events at a glance
 
 == Changelog ==
-== 7.0 (RC1) ==
+== 7.0.1 ==
 * Added recurring events functionality, which now hosts one page for all events of that recurrence type.
 * Added recurrence booking form picker including a calendar and dropdown selection.
 * Added support for true timezone-relative calendar and recurrence selection listings via the `calendar_timezone` attribute.

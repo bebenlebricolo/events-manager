@@ -22,6 +22,7 @@ class EM_Event_Posts_Admin{
 			$row_action_type = is_post_type_hierarchical( EM_POST_TYPE_EVENT ) ? 'page_row_actions' : 'post_row_actions';
 			add_filter($row_action_type, array('EM_Event_Posts_Admin','row_actions'),10,2);
 			add_action('admin_head', array('EM_Event_Posts_Admin','admin_head'));
+
 		}
 		//collumns
 		add_filter('manage_'.EM_POST_TYPE_EVENT.'_posts_columns' , array('EM_Event_Posts_Admin','columns_add'));
@@ -354,9 +355,7 @@ class EM_Event_Recurring_Posts_Admin{
 			<p><?php esc_html_e( 'Modifications to repeating events will be applied to all recurrences and will overwrite any changes made to those individual event recurrences.', 'events-manager'); ?></p>
 			<p><?php esc_html_e( 'Bookings to individual event recurrences will be preserved if event times and ticket settings are not modified.', 'events-manager'); ?></p>
 			<p>
-				<a href="<?php echo esc_url( em_get_events_admin_url() ); ?>">
-					<strong><?php echo sprintf( esc_html__('You can edit individual recurrences and disassociate them with a %s to prevent getting overwritten.', 'events-manager'), esc_html__('repeating event', 'events-manager')); ?></strong>
-				</a>
+				<?php echo sprintf( esc_html__('You can edit individual recurrences and disassociate them with a %s to prevent getting overwritten.', 'events-manager'), esc_html__('repeating event', 'events-manager')); ?></strong>
 	    	</p>
 		</div>
 		<?php
@@ -445,6 +444,13 @@ class EM_Event_Recurring_Posts_Admin{
 			global $post, $EM_Event;
 			$EM_Event = em_get_event($post, 'post_id');
 			$actions['duplicate'] = '<a href="'.$EM_Event->duplicate_url().'" title="'.sprintf(__('Duplicate %s','events-manager'), __('Event','events-manager')).'">'.__('Duplicate','events-manager').'</a>';
+			if ( get_option('dbem_recurrence_convert_enabled') ) {
+				$convert_url = esc_url( add_query_arg( ['action' => 'convert_to_recurrence', 'event_id' => $EM_Event->event_id, 'nonce' => 'x'] ) );
+				$convert_nonce = wp_create_nonce('convert_to_recurrence_'.$EM_Event->event_id);
+				$actions['convert'] = '<a href="'. $convert_url .'" class="em-convert-recurrence-link" data-nonce="' . $convert_nonce . '">'. esc_html__('Convert Recurring', 'events-manager') . '</a>';
+				$js_warning = esc_html__('This will delete all event recurrence posts/pages, and unify them into one URL. Any 404 pages resulting from these will automatically 302-redirect to the recurring event (which will be a new URL).', 'events-manager');
+				EM\Scripts_and_Styles::add_js_var('convert_recurring_warning', __('Are you sure you want to convert this repeating event?', 'events-manager') . "\n\n" . __('WARNING: This action cannot be undone.', 'events-manager') . "\n\n" . $js_warning);
+			}
 		}
 		return $actions;
 	}
