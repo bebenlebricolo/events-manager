@@ -5,7 +5,7 @@ Tags: events, calendar, tickets, bookings, appointments
 Text Domain: events-manager
 Requires at least: 6.1
 Tested up to: 6.8
-Stable tag: 7.0.1
+Stable tag: 7.0.2
 Requires PHP: 7.0
 License: GPLv2
 
@@ -164,6 +164,11 @@ See our [FAQ](http://wp-events-plugin.com/documentation/faq/) page for helps wit
 18. Grid view for displaying your upcoming events at a glance
 
 == Changelog ==
+
+= 7.0.2 =
+* Fixed recurring event editor UI display issues on front-end for recurring/repeated event patterns.
+* Fixed bbPress fatal error.
+* Fixed ticket start/end times being ignored due to new overriding ticket settings.
 
 = 7.0.1 =
 * Added recurring events functionality, which now hosts one page for all events of that recurrence type.

@@ -71,7 +71,7 @@ $id = rand(); // not related to searches, so we'll just add an ID for good pract
 		<section class="event-form-recurrences recurring-event-editor <?php echo $template; ?>">
 			<h4><?php esc_html_e( 'Recurrences', 'events-manager'); ?></h4>
 			<div class="input">
-				<?php em_locate_template('forms/event/when/recurring/recurrences/recurrences.php',true); ?>
+				<?php em_locate_template('forms/event/when/recurring/recurrences.php',true); ?>
 			</div>
 		</section>
 

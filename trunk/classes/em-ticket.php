@@ -591,8 +591,8 @@ class EM_Ticket extends EM_Object {
 				$user = is_user_logged_in() ? wp_get_current_user() : false;
 			}
 			$available_spaces = $this->get_available_spaces();
-			$condition_1 = empty($this->start) || $this->start()->getTimestamp() <= time();
-			$condition_2 = empty($this->end) || $this->end()->getTimestamp() >= time();
+			$condition_1 = empty($this->ticket_start) || $this->start()->getTimestamp() <= time();
+			$condition_2 = empty($this->ticket_end) || $this->end()->getTimestamp() >= time();
 			$condition_3 = $EM_Event->rsvp_end()->getTimestamp() > time(); //either defined ending rsvp time, or start datetime is used here
 			$condition_4 = !$this->members || $user !== false || $ignore_member_restrictions;
 			$condition_5 = true;
