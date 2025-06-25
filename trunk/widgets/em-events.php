@@ -71,7 +71,7 @@ class EM_Widget extends WP_Widget {
 			$instance = $this->get_v6_instance_options($instance);
 	    }
 		//orderby fix for previous versions with old orderby values
-		if( !array_key_exists($instance['orderby'], $this->em_orderby_options) ){
+		if( !array_key_exists($instance['orderby'], $this->em_orderby_options ?? []) ){
 			//replace old values
 			$old_vals = array(
 				'name' => 'event_name',

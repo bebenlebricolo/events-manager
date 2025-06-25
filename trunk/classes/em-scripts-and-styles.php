@@ -330,7 +330,7 @@ class Scripts_and_Styles {
 			],
 		];
 		// booking form loader
-		$em_localized_js['assets']['.em-booking-form, #em-booking-form, .em-booking-recurring'] = apply_filters('em_booking_form_assets', [
+		$em_localized_js['assets']['.em-booking-form, #em-booking-form, .em-booking-recurring, .em-event-booking-form'] = apply_filters('em_booking_form_assets', [
 			'js' => [
 				'em-bookings' => ['url' => $js_url.'bookingsform'.$js, 'event' => 'em_booking_form_js_loaded' ],
 			],

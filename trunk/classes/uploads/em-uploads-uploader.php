@@ -759,6 +759,5 @@ class Uploader {
 		</script>
 		<?php
 	}
-
 }
-Uploader::init();
+add_filter('events_manager_loaded', ['EM\Uploads\Uploader', 'init'], 1);

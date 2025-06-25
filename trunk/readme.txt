@@ -164,6 +164,11 @@ See our [FAQ](http://wp-events-plugin.com/documentation/faq/) page for helps wit
 18. Grid view for displaying your upcoming events at a glance
 
 == Changelog ==
+= 7.0.2.1 (dev) =
+* Fixed code to prevent fatal error in some instances where users run a widget.
+* Added additional CSS selector/detector to booking form JS dynamic loading to detect waitlist forms.
+* Changed uploader to initialize on `init` so that multisite global options are applied.
+* Moved `EM_MS_Globals` out of `events-manager.php` into its own class file.
 
 = 7.0.2 =
 * Fixed recurring event editor UI display issues on front-end for recurring/repeated event patterns.
