@@ -923,6 +923,7 @@ function em_output_events_view( $args, $view = null ){
 		$view = empty($args['view']) ? get_option('dbem_search_form_view') : $args['view'];
 	}
     do_action('em_output_events_view_header', $args, $view);
+	if( empty($args['id']) ) $args['id'] = rand(100, getrandmax()); // prevent warnings
 	
 	if ( !empty($args['has_search']) ) {
 		// get the default args for this list of events, so it's defaulted into the search form

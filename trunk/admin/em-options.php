@@ -178,7 +178,7 @@ function em_options_save(){
 	if( !empty($_REQUEST['action']) && $_REQUEST['action'] == 'cleanup_event_orphans' && check_admin_referer('em_cleanup_event_orphans_'.get_current_user_id().'_wpnonce') && em_wp_is_super_admin() ){
 		//Firstly, get all orphans
 		global $wpdb;
-		$sql = 'SELECT event_id FROM '.EM_EVENTS_TABLE.' WHERE post_id NOT IN (SELECT ID FROM ' .$wpdb->posts. ' WHERE post_type="'. EM_POST_TYPE_EVENT .'" OR post_type="event-recurring")';
+		$sql = 'SELECT event_id FROM '.EM_EVENTS_TABLE.' WHERE post_id > 0 AND post_id NOT IN (SELECT ID FROM ' .$wpdb->posts. ' WHERE post_type="'. EM_POST_TYPE_EVENT .'" OR post_type="event-recurring")';
 		if( EM_MS_GLOBAL ){
 			if( is_main_site() ){
 				$sql .= $wpdb->prepare(' AND (blog_id=%d or blog_id IS NULL)', get_current_blog_id());
@@ -279,7 +279,7 @@ function em_options_save(){
 		if ( $post_deletion !== false ) {
 			$meta_deletion = $wpdb->query( 'DELETE FROM ' . $wpdb->postmeta . ' WHERE post_id IN (' . $post_ids_subquery . ')' );
 			if ( $meta_deletion !== false ) {
-				$update_events = $wpdb->query( 'UPDATE ' . EM_EVENTS_TABLE . " SET post_id = NULL WHERE event_type = 'recurrencee' AND post_id > 0" );
+				$update_events = $wpdb->query( 'UPDATE ' . EM_EVENTS_TABLE . " SET post_id = NULL WHERE event_type = 'recurrence' AND post_id > 0" );
 				if ( $update_events !== false ) {
 					$wpdb->update( EM_EVENTS_TABLE, ['event_type' => 'recurring'], ['event_type' => 'repeating'] );
 					$wpdb->update( $wpdb->postmeta, ['meta_value' => 'recurring'], ['meta_key'=> '_event_type', 'meta_value' => 'repeating'] );
@@ -288,6 +288,7 @@ function em_options_save(){
 					update_option('dbem_recurrence_enabled', true);
 					$message = __('The repeating events have been converted into recurring events.', 'events-manager');
 					$EM_Notices->add_confirm( $message, true );
+					EM_Admin_Notices::remove('v7-reconvert-recurrences');
 				} else {
 					$EM_Notices->add_error( 'Deleted post data and meta, but could not update event.', true );
 				}
@@ -1009,7 +1010,7 @@ function em_admin_option_box_uninstall(){
     			    <td>
     			    	<?php 
     			    		global $wpdb;
-    			    		$sql = 'SELECT count(*) FROM '.EM_EVENTS_TABLE.' WHERE post_id NOT IN (SELECT ID FROM ' .$wpdb->posts. ' WHERE post_type="'. EM_POST_TYPE_EVENT .'" OR post_type="event-recurring")';
+    			    		$sql = 'SELECT count(*) FROM '.EM_EVENTS_TABLE.' WHERE post_id > 0 AND post_id NOT IN (SELECT ID FROM ' .$wpdb->posts. ' WHERE post_type="'. EM_POST_TYPE_EVENT .'" OR post_type="event-recurring")';
     			    		if( EM_MS_GLOBAL ){
     			    			if( is_main_site() ){
     			    				$sql .= $wpdb->prepare(' AND (blog_id=%d or blog_id IS NULL)', get_current_blog_id());

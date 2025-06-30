@@ -61,6 +61,7 @@ class EM_Object {
 			'location' => false,
 			'event' => false,
 			'event_status' => false, //automatically set to 'status' value if in EM_Events, useful only for EM_Locations
+			'event_type' => false,
 			'location_status' => false,  //automatically set to 'status' value if in EM_Locations, useful only for EM_Events
 			'offset'=>0,
 			'page'=>1,//basically, if greater than 0, calculates offset at end
@@ -102,8 +103,12 @@ class EM_Object {
 			if( array_key_exists('page', $array) ) { $array['page'] = absint($array['page']); }
 		
 			//Clean all id lists
-			$clean_ids_array = array('location', 'event', 'post_id', 'active_status');
+			$clean_ids_array = array('location', 'event', 'active_status');
 			if( !empty($array['owner']) && $array['owner'] != 'me') $clean_ids_array[] = 'owner'; //clean owner attribute if not 'me'
+			// add post
+			if ( !empty($array['post_id']) && !is_bool($array['post_id']) && $array['post_id'] !== 'true' ) {
+				$clean_ids_array[] = 'post_id';
+			}
 			$array = self::clean_id_atts($array, $clean_ids_array);
 
 			//Clean taxonomies
@@ -158,6 +163,14 @@ class EM_Object {
 				if( $array['language'] !== false && !in_array($array['language'], EM_ML::$langs) ){
 					unset($array['language']);
 				}
+			}
+			if ( !empty($array['event_type']) ) {
+				// sanitize again, just in case
+				if ( !is_array($array['event_type']) ) {
+					$array['event_type'] = explode(',', str_replace(' ', '', $array['event_type']));
+				}
+				$allowed_event_types = ['recurring', 'repeating', 'recurrence', 'event'];
+				$array['event_type'] = array_intersect( $allowed_event_types, $array['event_type'] );
 			}
 			//return clean array
 			$defaults = array_merge ( $defaults, $array ); //No point using WP's cleaning function, we're doing it already.
@@ -301,22 +314,32 @@ class EM_Object {
 		
 		//Recurrences
 		// TODO Transition recurrences over time...
-		if( $recurring ){
-			//we show recurring event templates as well within results, if 'recurring' is 'include' then we show both recurring and normal events.
-			if( $recurring !== 'include' ){
-				$conditions['recurring'] = "`event_type` IN ('repeating','recurring')";
+		if ( !empty($args['event_type']) ) {
+			// sanitize again, just in case
+			if ( !is_array($args['event_type']) ) {
+				$args['event_type'] = explode(',', str_replace(' ', '', $args['event_type']));
 			}
-		}elseif( $recurrence > 0 ){
-			$conditions['recurrence'] = $wpdb->prepare("(`recurrence_set_id` IN (SELECT recurrence_set_id FROM ". EM_EVENT_RECURRENCES_TABLE ." WHERE event_id=%d))", $recurrence);
-		}else{
-			//we choose to either exclusively show or completely omit recurrences, if not set then both are shown
-		    if( $recurrences !== null ){
-		    	$conditions['recurrences'] = $recurrences ? "(`recurrence_set_id` > 0 )":"(`recurrence_set_id` IS NULL OR `recurrence_set_id`=0 )";
-		    }
-		    //if we get here and $recurring is not exactly null (meaning ignored), it was set to false or 0 meaning recurring events shouldn't be included
-		    if( $recurring !== null ){
-		    	$conditions['recurring'] = "(`event_type` NOT IN ('repeating','recurring'))";
-		    }
+			$allowed_event_types = ['recurring', 'repeating', 'recurrence', 'event'];
+			$event_types = array_intersect( $allowed_event_types, $args['event_type'] );
+			$conditions['event_type'] = "(`event_type` IN ('" . implode("','", $event_types) . "'))";
+		} else {
+			if ( $recurring ) {
+				//we show recurring event templates as well within results, if 'recurring' is 'include' then we show both recurring and normal events.
+				if ( $recurring !== 'include' ) {
+					$conditions['recurring'] = "`event_type` IN ('repeating','recurring')";
+				}
+			} elseif ( $recurrence > 0 ) {
+				$conditions['recurrence'] = $wpdb->prepare( "(`recurrence_set_id` IN (SELECT recurrence_set_id FROM " . EM_EVENT_RECURRENCES_TABLE . " WHERE event_id=%d))", $recurrence );
+			} else {
+				//we choose to either exclusively show or completely omit recurrences, if not set then both are shown
+				if ( $recurrences !== null ) {
+					$conditions['recurrences'] = $recurrences ? "(`recurrence_set_id` > 0 )" : "(`recurrence_set_id` IS NULL OR `recurrence_set_id`=0 )";
+				}
+				//if we get here and $recurring is not exactly null (meaning ignored), it was set to false or 0 meaning recurring events shouldn't be included
+				if ( $recurring !== null ) {
+					$conditions['recurring'] = "(`event_type` NOT IN ('repeating','recurring'))";
+				}
+			}
 		}
 		
 		//Timezone - search for events in a specific timezone

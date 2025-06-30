@@ -5,7 +5,7 @@ Tags: events, calendar, tickets, bookings, appointments
 Text Domain: events-manager
 Requires at least: 6.1
 Tested up to: 6.8
-Stable tag: 7.0.2
+Stable tag: 7.0.3
 Requires PHP: 7.0
 License: GPLv2
 
@@ -164,11 +164,25 @@ See our [FAQ](http://wp-events-plugin.com/documentation/faq/) page for helps wit
 18. Grid view for displaying your upcoming events at a glance
 
 == Changelog ==
-= 7.0.2.1 (dev) =
+= 7.0.3 =
 * Fixed code to prevent fatal error in some instances where users run a widget.
 * Added additional CSS selector/detector to booking form JS dynamic loading to detect waitlist forms.
 * Changed uploader to initialize on `init` so that multisite global options are applied.
 * Moved `EM_MS_Globals` out of `events-manager.php` into its own class file.
+* Fixed bug in multisite global tables mode showing faulty recurrence set records in the editor.
+* Added recurring event recurrence description to events admin list.
+* Changed default scope to 'all' for any post status other than 'All' or 'Published' in admin events list.
+* Added `event_type` search attribute for `EM_Events::get()`, accepting comma-separated list or array of event types to include.
+* Added `post_id` accepted boolean values (or `'true'` / `'0'`) to include or exclude events with a post ID (essentially, include/exclude recurrences).
+* Fixed search form not working in shortcode using `has_search` due to view container ID mismatches.
+* Fixed potential widget fatal errors.
+* Added cache flushing when editing category colors or images to update cached pages throughout a site.
+* Fixed `EM_Event->save()` invocation trying to create a post even if it’s an event recurrence.
+* Fixed ability to add higher than `event_status` 1 and added `em_get_post_status` to allow custom post statuses in WP admin.
+* Fixed end-of-month jumps when `empty_months` is set to false.
+* Changed newly added `empty_months` shortcode prop to `true`, which mimics previous calendar behavior.
+* Fixed orphaned events remover in admin tools incorrectly including new recurrences as orphaned events.
+* Fixed conversion issues from repeated to recurring events, now prompting re-conversion for upgraded event installs.
 
 = 7.0.2 =
 * Fixed recurring event editor UI display issues on front-end for recurring/repeated event patterns.

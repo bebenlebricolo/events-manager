@@ -177,12 +177,6 @@ class EM_Event_Posts_Admin{
             	<input type="hidden" name="author" value="<?php echo esc_attr($_REQUEST['author']); ?>" >
             	<?php            	
             }
-			// overwrite post status search if using custom stati
-			if( !empty($_REQUEST['post_status']) && ($_REQUEST['post_status'] === 'past' || $_REQUEST['post_status'] === 'future') ){
-				?>
-				<input type="hidden" name="post_status" value="all" >
-				<?php
-			}
 		}
 	}
 	
@@ -277,20 +271,25 @@ class EM_Event_Posts_Admin{
 					<?php if( get_option('dbem_bookings_approval') == 1 ): ?>
 						| <?php _e("Pending",'events-manager') ?>: <?php echo $EM_Event->get_bookings()->get_pending_spaces(); ?>
 					<?php endif;
-					echo ($EM_Event->is_recurrence()) ? '<br />':'';
+					echo ( $EM_Event->is_recurrence() || $EM_Event->is_recurring() ) ? '<br />':''; // decide here in case bookings disabled
 				}
-				if ( $EM_Event->is_recurrence() && current_user_can('edit_recurring_events','edit_others_recurring_events') ) {
+				if ( ( $EM_Event->is_recurrence() || $EM_Event->is_recurring() ) && current_user_can('edit_recurring_events','edit_others_recurring_events') ) {
 					$actions = array();
-					if( $EM_Event->get_recurring_event()->can_manage('edit_recurring_events', 'edit_others_recurring_events') ){
-						$actions[] = '<a href="'. admin_url() .'post.php?action=edit&amp;post='. $EM_Event->get_recurring_event()->post_id .'">'. sprintf( esc_html__( 'Edit %s', 'events-manager'), esc_html__('Repeating Events', 'events-manager')). '</a>';
-						$actions[] = '<a class="em-detach-link" href="'. esc_url($EM_Event->get_detach_url()) .'">'. esc_html__('Detach', 'events-manager') .'</a>';
-					}
-					if( $EM_Event->get_recurring_event()->can_manage('delete_recurring_events', 'delete_others_recurring_events') ){
-						$actions[] = '<span class="trash"><a class="em-delete-recurrence-link" href="'. get_delete_post_link($EM_Event->get_recurring_event()->post_id) .'">'. esc_html__('Delete','events-manager') .'</a></span>';
+					if ( !$EM_Event->is_recurring() ) {
+						if ( $EM_Event->get_recurring_event()->can_manage( 'edit_recurring_events', 'edit_others_recurring_events' ) ) {
+							$actions[] = '<a href="' . admin_url() . 'post.php?action=edit&amp;post=' . $EM_Event->get_recurring_event()->post_id . '">' . sprintf( esc_html__( 'Edit %s', 'events-manager' ), esc_html__( 'Repeating Events', 'events-manager' ) ) . '</a>';
+							$actions[] = '<a class="em-detach-link" href="' . esc_url( $EM_Event->get_detach_url() ) . '">' . esc_html__( 'Detach', 'events-manager' ) . '</a>';
+						}
+						if ( $EM_Event->get_recurring_event()->can_manage( 'delete_recurring_events', 'delete_others_recurring_events' ) ) {
+							$actions[] = '<span class="trash"><a class="em-delete-recurrence-link" href="' . get_delete_post_link( $EM_Event->get_recurring_event()->post_id ) . '">' . esc_html__( 'Delete', 'events-manager' ) . '</a></span>';
+						}
 					}
 					?>
 					<strong>
-					<?php echo $EM_Event->get_recurring_event()->get_recurrence_sets()->get_recurrence_description(); ?>
+						<?php if ( $EM_Event->is_recurring() ) : ?>
+							<span class="dashicons dashicons-update-alt em-recurring-event" style="color:#aaa; padding-top:-2px;"></span>
+						<?php endif; ?>
+						<?php echo $EM_Event->get_recurring_event()->get_recurrence_sets()->get_recurrence_description( !$EM_Event->is_recurring() ); ?>
 					</strong>
 					<?php if( !empty($actions) ): ?>
 					<br >

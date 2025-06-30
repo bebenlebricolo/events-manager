@@ -71,7 +71,6 @@ class EM_Events extends EM_Object {
 			}else{
 				$selectors = $events_table.'.event_id, '. $events_table.'.post_id';
 			}
-			if( $calc_found_rows ) $selectors = 'SQL_CALC_FOUND_ROWS ' . $selectors; //for storing total rows found
 			$selectors = 'DISTINCT ' . $selectors; //duplicate avoidance
 		}
 		
@@ -203,7 +202,8 @@ $limit $offset";
 		$results = $wpdb->get_results( $sql, ARRAY_A);
 		self::$num_rows = $wpdb->num_rows;
 		if( $calc_found_rows ){
-			self::$num_rows_found = $wpdb->get_var('SELECT FOUND_ROWS()');
+			$sql_count = str_replace( $selectors, ' COUNT(*) ', $sql );
+			self::$num_rows_found = $wpdb->get_var($sql_count);
 		}else{
 			self::$num_rows_found = self::$num_rows;
 		}
@@ -295,7 +295,7 @@ $limit $offset";
 		//Can be either an array for the get search or an array of EM_Event objects
 		if( is_object(current($args)) && get_class((current($args))) == 'EM_Event' ){
 			$func_args = func_get_args();
-			$events = $func_args[0];
+			$events = $func_args[0]; /* @var EM_Event[] $events */
 			$args = (!empty($func_args[1]) && is_array($func_args[1])) ? $func_args[1] : array();
 			$args = apply_filters('em_events_output_args', self::get_default_search($args), $events);
 			$limit = ( !empty($args['limit']) && is_numeric($args['limit']) ) ? $args['limit']:false;
@@ -605,9 +605,15 @@ $limit $offset";
 		if( !empty($args['post_id'])){
 			if( is_array($args['post_id']) ){
 				$conditions['post_id'] = "(".EM_EVENTS_TABLE.".post_id IN (".implode(',',$args['post_id'])."))";
-			}else{
+			} elseif ( $args['post_id'] === true || $args['post_id'] === 'true' ) {
+				// if set to true specifically (or 'true' in a shortcode, we search for all events that DO HAVE a post ID (recurrences)
+				$conditions['post_id'] = "(".EM_EVENTS_TABLE.".post_id > 0 )";
+			} else {
 				$conditions['post_id'] = "(".EM_EVENTS_TABLE.".post_id={$args['post_id']})";
 			}
+		} elseif ( $args['post_id'] === null || $args['post_id'] === '0' || $args['post_id'] === 0 ) {
+			// if not false, we search for all events which do not have a post ID (recurrences)
+			$conditions['post_id'] = "(".EM_EVENTS_TABLE.".post_id IS NULL )";
 		}
 		// event locations
 		if( !empty($args['event_location_type']) ){
@@ -770,6 +776,7 @@ $limit $offset";
 			'cancelled' => get_option('dbem_events_include_status_cancelled') ? null : false, // include cancelled events
 			'active' => null,
 			'active_status' => null,
+			'event_type' => false,
 		);
 		//sort out whether defaults were supplied or just the array of search values
 		if( empty($array) ){

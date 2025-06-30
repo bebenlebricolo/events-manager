@@ -271,7 +271,11 @@ class EM_Event_Post {
 		    $query = array();
 			//Let's deal with the scope - default is future
 			if( is_admin() ){
-				$scope = $wp_query->query_vars['scope'] = (!empty($_REQUEST['scope'])) ? $_REQUEST['scope']:'future';
+				if ( in_array( $_REQUEST['post_status'] ?? 'all', [ 'future', 'draft', 'pending', 'private', 'trash'] ) ) {
+					$scope = $wp_query->query_vars['scope'] = (!empty($_REQUEST['scope'])) ? $_REQUEST['scope']:'all';
+				} else {
+					$scope = $wp_query->query_vars['scope'] = (!empty($_REQUEST['scope'])) ? $_REQUEST['scope']:'future';
+				}
 				if ( !empty( $wp_query->query_vars['recurring_event'] ) && is_numeric( $wp_query->query_vars['recurring_event'] ) ) {
 					global $wpdb;
 					$sql = $wpdb->prepare("SELECT recurrence_set_id FROM " . EM_EVENT_RECURRENCES_TABLE . " WHERE event_id = %d AND recurrence_type='include'", $wp_query->query_vars['recurring_event'] );

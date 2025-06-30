@@ -98,8 +98,7 @@ class Recurrence_Sets extends \EM_Object implements \Iterator, \ArrayAccess, \Co
 		if ( $this->event_id ) {
 			// load recurrence sets
 			global $wpdb;
-			$table_name = $wpdb->prefix . 'em_event_recurrences';
-			$results = $wpdb->get_results( $wpdb->prepare( "SELECT * FROM $table_name WHERE event_id = %d ORDER BY recurrence_order, recurrence_set_id ASC", $this->event_id ), ARRAY_A );
+			$results = $wpdb->get_results( $wpdb->prepare( "SELECT * FROM " . EM_EVENT_RECURRENCES_TABLE . " WHERE event_id = %d ORDER BY recurrence_order, recurrence_set_id ASC", $this->event_id ), ARRAY_A );
 			foreach ( $results as $row ) {
 				$Recurrence_Set = new Recurrence_Set( $row );
 				if ( $Recurrence_Set->type == 'include' ) {
@@ -225,19 +224,19 @@ class Recurrence_Sets extends \EM_Object implements \Iterator, \ArrayAccess, \Co
 	 * Returns a string representation of this recurrence. Will return false if not a recurrence
 	 * @return string
 	 */
-	function get_recurrence_description () {
+	function get_recurrence_description ( $include_dates = true ) {
 		$EM_Event = $this->get_event();
 		$descriptions = [];
 		if ( $EM_Event ) {
-			$descriptions[] = sprintf( __( 'From %1$s to %2$s', 'events-manager' ), $EM_Event->start()->i18n( em_get_date_format() ), $EM_Event->end()->i18n( em_get_date_format() ) );
+			if ( $include_dates ) {
+				$descriptions[] = sprintf( __( 'From %1$s to %2$s', 'events-manager' ), $EM_Event->start()->i18n( em_get_date_format() ), $EM_Event->end()->i18n( em_get_date_format() ) );
+			}
+			$pattern = ucfirst( $this->default->get_recurrence_description() );
 			$count = count( $this->include );
 			if ( $count > 1 ) {
-				$descriptions[] = sprintf( __( '%d Patterns', 'events-manager' ), $count );
-			} else {
-				foreach ( $this->include as $Recurrence_Set ) {
-					$descriptions[] = $Recurrence_Set->get_recurrence_description();
-				}
+				$pattern .= ' + ' . sprintf( _n( '%d Pattern', '%d Patterns', $count -1, 'events-manager' ), $count -1 );
 			}
+			$descriptions[] = $pattern;
 		}
 
 		return implode( ', ', $descriptions );

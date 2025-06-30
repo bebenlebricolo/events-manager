@@ -1774,7 +1774,7 @@ function em_upgrade_current_installation(){
 			EM_Admin_Notices::add(new EM_Admin_Notice(array( 'name' => 'v-update', 'who' => 'admin', 'what' => 'warning', 'where' => 'all', 'message' => $message )), is_multisite());
 		}
 		// V7 Updates
-		if( version_compare( $current_version, '6.9.9.1', '<') ){
+		if( version_compare( $current_version, '7.0', '<') ){
 			if ( EM_MS_GLOBAL ) {
 				// do this once to global tables
 				$done_already = $wpdb->get_var('SELECT event_id FROM ' . EM_EVENTS_TABLE . " WHERE event_type='repeating'");
@@ -1806,17 +1806,25 @@ function em_upgrade_current_installation(){
 			    INSERT INTO {$wpdb->postmeta} (post_id, meta_key, meta_value)
 			    SELECT e.post_id, '_recurrence_set_id', e.recurrence_set_id FROM " . EM_EVENTS_TABLE . " e WHERE e.recurrence_set_id IS NOT NULL
 			");
-		}
-		if ( version_compare( $current_version, '6.6.4.4.2.5', '<') ){
+
 			// update tickets so they are all enabled by default
 			$wpdb->query("UPDATE " . EM_TICKETS_TABLE . " SET ticket_status = 1 WHERE ticket_parent IS NULL");
-		}
-		if ( version_compare( $current_version, '6.6.4.4.3', '<') ){
 			// update tickets so they are all enabled by default
 			update_option('dbem_repeating_enabled', get_option('dbem_recurrence_enabled'));
 			update_option('dbem_recurrence_enabled', false);
 			$message = 'Events Manager 7.0 introduces completely revamped recurring events functionality! Enable recurring events in <em>Events > Settings > General > General Options > Events</em>. <a target="_blank" href="https://em.cm/em7-update/">check our blog post</a>';
 			EM_Admin_Notices::add(new EM_Admin_Notice(array( 'name' => 'v-update', 'who' => 'admin', 'what' => 'warning', 'where' => 'all', 'message' => $message )), is_multisite());
+		}
+		if ( version_compare( $current_version, '7.0.2.2', '<' ) ) {
+			// check if recurrence_freq still exists in the database table wp_em_events, and if so check if dbem_recurrence_enabled is true and   dbem_repeating_enabled is false - if this all meets criteria, we need to warn users to try re-converting their events
+			$column = $wpdb->get_row( "SHOW FULL COLUMNS FROM ". EM_EVENTS_TABLE . " WHERE Field='recurrence_freq';" );
+			if ( $column ) {
+				if ( get_option( 'dbem_recurrence_enabled' ) && ! get_option( 'dbem_repeating_enabled' ) ) {
+					// user may have converted everything from 6 to 7 and we should encourage a re-import
+					$EM_Admin_Notice = new EM_Admin_Notice(array( 'name' => 'v7-reconvert-recurrences', 'who' => 'admin', 'where' => 'all' ));
+					EM_Admin_Notices::add($EM_Admin_Notice, is_multisite());
+				}
+			}
 		}
 	}
 }

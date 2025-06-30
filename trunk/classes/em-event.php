@@ -1071,81 +1071,86 @@ class EM_Event extends EM_Object{
 	function save(){
 		global $wpdb, $current_user, $blog_id, $EM_SAVING_EVENT;
 		$EM_SAVING_EVENT = true; //this flag prevents our dashboard save_post hooks from going further
-		if( !$this->can_manage('edit_events', 'edit_others_events') && !( get_option('dbem_events_anonymous_submissions') && empty($this->event_id)) ){
-			//unless events can be submitted by an anonymous user (and this is a new event), user must have permissions.
-			return apply_filters('em_event_save', false, $this);
-		}
-		//start saving process
-		do_action('em_event_save_pre', $this);
-		$post_array = array();
-		//Deal with updates to an event
-		if( !empty($this->post_id) ){
-			//get the full array of post data so we don't overwrite anything.
-			if( !empty($this->blog_id) && is_multisite() ){
-				$post_array = (array) get_blog_post($this->blog_id, $this->post_id);
+		if ( $this->is_recurrence() && $this->get_recurring_event()->is_recurring() ) {
+			// not repeated event, but a recurrence of a recurring event - no post saving done here
+			$result = true;
+		} else {
+			if( !$this->can_manage('edit_events', 'edit_others_events') && !( get_option('dbem_events_anonymous_submissions') && empty($this->event_id)) ){
+				//unless events can be submitted by an anonymous user (and this is a new event), user must have permissions.
+				return apply_filters('em_event_save', false, $this);
+			}
+			//start saving process
+			do_action('em_event_save_pre', $this);
+			$post_array = array();
+			//Deal with updates to an event
+			if( !empty($this->post_id) ){
+				//get the full array of post data so we don't overwrite anything.
+				if( !empty($this->blog_id) && is_multisite() ){
+					$post_array = (array) get_blog_post($this->blog_id, $this->post_id);
+				}else{
+					$post_array = (array) get_post($this->post_id);
+				}
+			}
+			//Overwrite new post info
+			$post_array['post_type'] = $this->is_repeating() ? 'event-recurring' : EM_POST_TYPE_EVENT;
+			$post_array['post_title'] = $this->event_name;
+			$post_array['post_content'] = !empty($this->post_content) ? $this->post_content : '';
+			$post_array['post_excerpt'] = $this->post_excerpt;
+			//decide on post status
+			if( empty($this->force_status) ){
+				if( count($this->errors) == 0 ){
+					$post_array['post_status'] = ( $this->can_manage('publish_events','publish_events') ) ? 'publish':'pending';
+				}else{
+					$post_array['post_status'] = 'draft';
+				}
 			}else{
-				$post_array = (array) get_post($this->post_id);
+			    $post_array['post_status'] = $this->force_status;
 			}
-		}
-		//Overwrite new post info
-		$post_array['post_type'] = $this->is_repeating() ? 'event-recurring' : EM_POST_TYPE_EVENT;
-		$post_array['post_title'] = $this->event_name;
-		$post_array['post_content'] = !empty($this->post_content) ? $this->post_content : '';
-		$post_array['post_excerpt'] = $this->post_excerpt;
-		//decide on post status
-		if( empty($this->force_status) ){
-			if( count($this->errors) == 0 ){
-				$post_array['post_status'] = ( $this->can_manage('publish_events','publish_events') ) ? 'publish':'pending';
-			}else{
-				$post_array['post_status'] = 'draft';
+			//anonymous submission only
+			if( !is_user_logged_in() && get_option('dbem_events_anonymous_submissions') && empty($this->event_id) ){
+				$post_array['post_author'] = get_option('dbem_events_anonymous_user');
+				if( !is_numeric($post_array['post_author']) ) $post_array['post_author'] = 0;
 			}
-		}else{
-		    $post_array['post_status'] = $this->force_status;
-		}
-		//anonymous submission only
-		if( !is_user_logged_in() && get_option('dbem_events_anonymous_submissions') && empty($this->event_id) ){
-			$post_array['post_author'] = get_option('dbem_events_anonymous_user');
-			if( !is_numeric($post_array['post_author']) ) $post_array['post_author'] = 0;
-		}
-		//Save post and continue with meta
-		$post_id = wp_insert_post($post_array);
-		$post_save = false;
-		$meta_save = false;
-		if( !is_wp_error($post_id) && !empty($post_id) ){
-			$post_save = true;
-			//refresh this event with wp post info we'll put into the db
-			$post_data = get_post($post_id);
-			$this->post_id = $this->ID = $post_id;
-			$this->post_type = $post_data->post_type;
-			$this->event_slug = $post_data->post_name;
-			$this->event_owner = $post_data->post_author;
-			$this->post_status = $post_data->post_status;
-			$this->get_status();
-			//Categories
-			if( get_option('dbem_categories_enabled') ){
-    			$this->get_categories()->event_id = $this->event_id;
-    			$this->categories->post_id = $this->post_id;
-    			$this->categories->save();
+			//Save post and continue with meta
+			$post_id = wp_insert_post($post_array);
+			$post_save = false;
+			$meta_save = false;
+			if( !is_wp_error($post_id) && !empty($post_id) ){
+				$post_save = true;
+				//refresh this event with wp post info we'll put into the db
+				$post_data = get_post($post_id);
+				$this->post_id = $this->ID = $post_id;
+				$this->post_type = $post_data->post_type;
+				$this->event_slug = $post_data->post_name;
+				$this->event_owner = $post_data->post_author;
+				$this->post_status = $post_data->post_status;
+				$this->get_status();
+				//Categories
+				if( get_option('dbem_categories_enabled') ){
+	                $this->get_categories()->event_id = $this->event_id;
+	                $this->categories->post_id = $this->post_id;
+	                $this->categories->save();
+				}
+				//anonymous submissions should save this information
+				if( !empty($this->event_owner_anonymous) ){
+					update_post_meta($this->post_id, '_event_owner_anonymous', 1);
+					update_post_meta($this->post_id, '_event_owner_name', $this->event_owner_name);
+					update_post_meta($this->post_id, '_event_owner_email', $this->event_owner_email);
+				}
+				//save the image, errors here will surface during $this->save_meta()
+				$this->image_upload();
+				//now save the meta
+				$meta_save = $this->save_meta();
 			}
-			//anonymous submissions should save this information
-			if( !empty($this->event_owner_anonymous) ){
-				update_post_meta($this->post_id, '_event_owner_anonymous', 1);
-				update_post_meta($this->post_id, '_event_owner_name', $this->event_owner_name);
-				update_post_meta($this->post_id, '_event_owner_email', $this->event_owner_email);
-			}
-			//save the image, errors here will surface during $this->save_meta()
-			$this->image_upload();
-			//now save the meta
-			$meta_save = $this->save_meta();
-		}
-		$result = $meta_save && $post_save;
-		if($result) $this->load_postdata($post_data, $blog_id); //reload post info
-		//do a dirty update for location too if it's not published
-		if( $this->is_published() && !empty($this->location_id) ){
-			$EM_Location = $this->get_location();
-			if( $EM_Location->location_status !== 1 ){
-				//let's also publish the location
-				$EM_Location->set_status(1, true);
+			$result = $meta_save && $post_save;
+			if($result) $this->load_postdata($post_data, $blog_id); //reload post info
+			//do a dirty update for location too if it's not published
+			if( $this->is_published() && !empty($this->location_id) ){
+				$EM_Location = $this->get_location();
+				if( $EM_Location->location_status !== 1 ){
+					//let's also publish the location
+					$EM_Location->set_status(1, true);
+				}
 			}
 		}
 		$return = apply_filters('em_event_save', $result, $this);
@@ -1583,9 +1588,9 @@ class EM_Event extends EM_Object{
 				$this->post_status = 'trash'; //set post status in this instance
 			}
 		}else{
-			$set_status = $status ? 1:0; //published or pending post
+			$set_status = absint($status); //published or pending post
 			if ( $this->post_id ) {
-				$post_status = $set_status ? 'publish':'pending';
+				$post_status = apply_filters( 'em_get_post_status', $set_status ? 'publish':'pending', $set_status, $this );
 				if( empty($this->post_name) ){
 					//published or pending posts should have a valid post slug
 					$slug = sanitize_title($this->post_title);

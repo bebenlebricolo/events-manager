@@ -54,7 +54,7 @@ class EM_Calendar extends EM_Object {
 			if( !empty($args['month']) && !empty($args['year']) ){
 				// check if we're looking for a future date, in which case we don't force anything
 				if( $args['scope'] == 'future' ){
-					$search_date = $EM_DateTime->copy()->setDate($args['year'], $args['month'], $EM_DateTime->format('d'));
+					$search_date = $EM_DateTime->copy()->setDate($args['year'], $args['month'], $EM_DateTime->format('d'))->setTime(23, 59, 59);
 					if( $search_date > $today ) {
 						$month = $args['month'];
 						$year = $args['year'];
@@ -738,7 +738,7 @@ class EM_Calendar extends EM_Object {
 			'calendar_nav' => true,
 			'calendar_header' => 'normal',
 			'calendar_month_nav' => true,
-			'empty_months' => false, // if empty months are to be shown
+			'empty_months' => true, // if empty months are to be shown
 			'calendar_timezone' => false, // if set to a timezone, we search and show dates/times in the specified timezone rather than local time
 		);
 
