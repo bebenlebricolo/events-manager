@@ -1283,7 +1283,7 @@ class EM_Event extends EM_Object{
 				$this->previous_status = 0; //for sure this was previously status 0
 				$this->event_date_created = $event_array['event_date_created'] = current_time('mysql');
 				if ( !$wpdb->insert(EM_EVENTS_TABLE, $event_array) ){
-					$this->add_error( sprintf(__('Something went wrong saving your %s to the index table. Please inform a site administrator about this.','events-manager'),__('event','events-manager')));
+					$this->log_db_error( __('event','events-manager'), EM_EVENTS_TABLE );
 				}else{
 					//success, so link the event with the post via an event id meta value for easy retrieval
 					$this->event_id = $wpdb->insert_id;
@@ -1298,7 +1298,7 @@ class EM_Event extends EM_Object{
 			    $this->get_previous_status();
 				$this->event_date_modified = $event_array['event_date_modified'] = current_time('mysql');
 				if ( $wpdb->update(EM_EVENTS_TABLE, $event_array, array('event_id'=>$this->event_id) ) === false ){
-					$this->add_error( sprintf(__('Something went wrong updating your %s to the index table. Please inform a site administrator about this.','events-manager'),__('event','events-manager')));			
+					$this->log_db_error( __('event','events-manager'), EM_EVENTS_TABLE );
 				}else{
 					//Also set the status here if status != previous status
 					if( $this->previous_status != $this->get_status() ) $this->set_status($this->get_status());

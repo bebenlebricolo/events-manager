@@ -143,7 +143,7 @@ function em_options_save(){
 			$wpdb->query('DROP TABLE '.EM_LOCATIONS_TABLE);
 			$wpdb->query('DROP TABLE '.EM_TICKETS_TABLE);
 			$wpdb->query('DROP TABLE '.EM_TICKETS_BOOKINGS_TABLE);
-			$wpdb->query('DROP TABLE '.EM_RECURRENCE_TABLE);
+			$wpdb->query('DROP TABLE '.EM_EVENT_RECURRENCES_TABLE);
 			$wpdb->query('DROP TABLE '.EM_META_TABLE);
 			
 			//delete options

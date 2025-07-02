@@ -523,7 +523,7 @@ class EM_Location extends EM_Object {
 			if( empty($this->location_id) || !$loc_truly_exists ){
 				$this->previous_status = 0; //for sure this was previously status 0
 				if ( !$wpdb->insert(EM_LOCATIONS_TABLE, $location_array) ){
-					$this->add_error( sprintf(__('Something went wrong saving your %s to the index table. Please inform a site administrator about this.','events-manager'),__('location','events-manager')));
+					$this->log_db_error( __('location','events-manager'), EM_LOCATIONS_TABLE );
 				}else{
 					//success, so link the event with the post via an event id meta value for easy retrieval
 					$this->location_id = $wpdb->insert_id;
@@ -533,7 +533,7 @@ class EM_Location extends EM_Object {
 			}else{
 				$this->get_previous_status();
 				if ( $wpdb->update(EM_LOCATIONS_TABLE, $location_array, array('location_id'=>$this->location_id)) === false ){
-					$this->add_error( sprintf(__('Something went wrong updating your %s to the index table. Please inform a site administrator about this.','events-manager'),__('location','events-manager')));			
+					$this->log_db_error( __('location','events-manager'), EM_LOCATIONS_TABLE );
 				}else{
 					$this->feedback_message = sprintf(__('Successfully saved %s','events-manager'),__('Location','events-manager'));
 					//Also set the status here if status != previous status

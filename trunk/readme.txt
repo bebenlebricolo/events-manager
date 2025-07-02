@@ -5,7 +5,7 @@ Tags: events, calendar, tickets, bookings, appointments
 Text Domain: events-manager
 Requires at least: 6.1
 Tested up to: 6.8
-Stable tag: 7.0.3
+Stable tag: 7.0.4
 Requires PHP: 7.0
 License: GPLv2
 
@@ -164,6 +164,13 @@ See our [FAQ](http://wp-events-plugin.com/documentation/faq/) page for helps wit
 18. Grid view for displaying your upcoming events at a glance
 
 == Changelog ==
+= 7.0.4 =
+* Fixed 3 security vulnerabilities reported by Muhammad Yudha and @mikemyers via WordFence. Update strongly advaised.
+* Fixed pagination errors introduced in 7.0.3.
+* Fixed potential collation issues with DB tables and added more meaningful errors when saving index tables so admins see clearer error messages.
+* Tweaked installation and update process to schedule DB updates via `wp_cron` for WP-CLI and auto-updates, rather than relying on a dashboard page load.
+* Fixed uninstall fatal error caused by the new `recurrences` table introduced in v7.
+
 = 7.0.3 =
 * Fixed code to prevent fatal error in some instances where users run a widget.
 * Added additional CSS selector/detector to booking form JS dynamic loading to detect waitlist forms.
