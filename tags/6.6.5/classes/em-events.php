@@ -325,7 +325,7 @@ $limit $offset";
 				$output .= self::get_pagination_links($args, $events_count);
 			}
 		}elseif( $args['no_results_msg'] !== false ){
-			$output = !empty($args['no_results_msg']) ? $args['no_results_msg'] : get_option('dbem_no_events_message');
+			$output = !empty($args['no_results_msg']) ? esc_html($args['no_results_msg']) : get_option('dbem_no_events_message');
 		}
 		
 		//TODO check if reference is ok when restoring object, due to changes in php5 v 4
@@ -475,7 +475,7 @@ $limit $offset";
 				echo self::get_pagination_links($args, $events_count, 'search_events', $default_args);
 			}
 		}elseif( $args['no_results_msg'] !== false ){
-			echo !empty($args['no_results_msg']) ? $args['no_results_msg'] : get_option('dbem_no_events_message');
+			echo !empty($args['no_results_msg']) ? esc_html($args['no_results_msg']) : get_option('dbem_no_events_message');
 		}
 		return apply_filters('em_events_output_grouped', ob_get_clean(), $EM_Events, $args, $events_count);
 	}

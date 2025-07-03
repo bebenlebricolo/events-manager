@@ -1000,8 +1000,6 @@ class EM_Object {
 					$x_by[] = $accepted_fields[$field];
 				}elseif( in_array($field,$accepted_fields) ){
 					$x_by[] = $field;
-				}elseif( array_key_exists( $key, $accepted_fields) ){
-					$x_by[] = $field;
 				}else{
 					unset($x_by[$key]);
 				}
