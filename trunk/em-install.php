@@ -1791,12 +1791,14 @@ function em_upgrade_current_installation(){
 		if( version_compare( $current_version, '7.0', '<') ){
 			if ( EM_MS_GLOBAL ) {
 				// do this once to global tables
-				$done_already = $wpdb->get_var('SELECT event_id FROM ' . EM_EVENTS_TABLE . " WHERE event_type='repeating'");
+				$has_null_event_types = $wpdb->get_var('SELECT event_id FROM ' . EM_EVENTS_TABLE . " WHERE event_type IS NULL");
+                $done_already = !$has_null_event_types;
 			}
 			if ( empty( $done_already ) ) {
 				// Update event_type based on recurrence field
 				$wpdb->query("UPDATE " . EM_EVENTS_TABLE . " SET event_type = 
 		                CASE 
+		                    WHEN event_type IS NOT NULL AND event_type != '". EM_POST_TYPE_EVENT ."' THEN event_type
 		                    WHEN recurrence = 1 THEN 'repeating' 
 		                    WHEN recurrence_id IS NOT NULL AND recurrence != 1 THEN 'recurrence' 
 		                    ELSE '". EM_POST_TYPE_EVENT ."'
@@ -1805,13 +1807,16 @@ function em_upgrade_current_installation(){
 				// Migrate recurrence data to new table
 				$wpdb->query("
 			            INSERT INTO ". EM_EVENT_RECURRENCES_TABLE ." ( event_id, recurrence_type, recurrence_freq, recurrence_interval, recurrence_byday, recurrence_byweekno, recurrence_start_date, recurrence_start_time, recurrence_end_date, recurrence_end_time, recurrence_duration, recurrence_order, recurrence_timezone, recurrence_status )
-			            SELECT event_id, 'include', recurrence_freq, recurrence_interval, recurrence_byday, recurrence_byweekno, event_start_date, event_start_time, event_end_date, event_end_time, recurrence_days, 1, event_timezone, event_status FROM " . EM_EVENTS_TABLE . " WHERE recurrence = 1 AND event_translation != 1
+			            SELECT event_id, 'include', recurrence_freq, recurrence_interval, recurrence_byday, recurrence_byweekno, event_start_date, event_start_time, event_end_date, event_end_time, recurrence_days, 1, event_timezone, event_status FROM " . EM_EVENTS_TABLE . " e WHERE recurrence = 1 AND event_translation != 1
+			            AND recurrence_set_id IS NULL AND NOT EXISTS ( SELECT 1 FROM " . EM_EVENT_RECURRENCES_TABLE . " er WHERE er.event_id = e.event_id )
 		            ");
 				// update events table with the new recurrence set id
 				$wpdb->query("UPDATE " . EM_EVENTS_TABLE . " e JOIN " . EM_EVENT_RECURRENCES_TABLE . " r ON e.recurrence_id = r.event_id SET e.recurrence_set_id = r.recurrence_set_id WHERE e.recurrence_id IS NOT NULL");
 			}
 			// copy over new values to post meta
 			// Copy event_type and recurrence_set_id to postmeta for all records with a post_id
+            // first delete any existing meta, JUST in case we're doing this twice and so we don't end up with duplicate meta
+			$wpdb->query( " DELETE FROM {$wpdb->postmeta} WHERE meta_key IN ( '_event_type', '_recurrence_set_id' ) AND post_id IN ( SELECT ID FROM {$wpdb->posts} WHERE post_type IN ('". EM_POST_TYPE_EVENT ."', 'event-recurring' ) ) ");
 			$wpdb->query("
 			    INSERT INTO {$wpdb->postmeta} (post_id, meta_key, meta_value)
 			    SELECT e.post_id, '_event_type', e.event_type FROM " . EM_EVENTS_TABLE . " e WHERE e.event_type IS NOT NULL

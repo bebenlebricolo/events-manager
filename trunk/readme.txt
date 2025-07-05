@@ -164,6 +164,13 @@ See our [FAQ](http://wp-events-plugin.com/documentation/faq/) page for helps wit
 18. Grid view for displaying your upcoming events at a glance
 
 == Changelog ==
+= 7.0.4.1 (dev) =
+* Improved installation/upgrade logic to allow users to re-trigger `dbem_version` upgrades from 6 to 7 without duplicating recurrence set data.
+* Fixed confusing redirect when converting individual repeated events to recurring events—now correctly redirects to the converted event.
+* Added `EM_Event->is_repated()` and `$include_repeated` boolean param to `EM_Event->is_recurring()` to differentiate between repeated events and instances of recurring events.
+* Fixed image display issues for recurring events on event lists.
+* Fixed orphan removals for Multisite installations.
+
 = 7.0.4 =
 * Fixed 3 security vulnerabilities reported by Muhammad Yudha and @mikemyers via WordFence. Update strongly advaised.
 * Fixed pagination errors introduced in 7.0.3.

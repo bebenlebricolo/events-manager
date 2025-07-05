@@ -1071,7 +1071,7 @@ class EM_Event extends EM_Object{
 	function save(){
 		global $wpdb, $current_user, $blog_id, $EM_SAVING_EVENT;
 		$EM_SAVING_EVENT = true; //this flag prevents our dashboard save_post hooks from going further
-		if ( $this->is_recurrence() && $this->get_recurring_event()->is_recurring() ) {
+		if ( $this->is_recurrence() ) {
 			// not repeated event, but a recurrence of a recurring event - no post saving done here
 			$result = true;
 		} else {
@@ -2066,18 +2066,23 @@ class EM_Event extends EM_Object{
 	 * @see EM_Object::get_image_url()
 	 */
 	function get_image_url($size = 'full'){
-	    if( EM_MS_GLOBAL && get_current_blog_id() != $this->blog_id ){
-	        switch_to_blog($this->blog_id);
-	        $switch_back = true;
-	    }
-		$return = parent::get_image_url($size);
-		if( !empty($switch_back) ){ restore_current_blog(); }
+		if ( $this->is_recurrence() ) {
+			$this->image_url = $this->get_recurring_event()->get_image_url($size);
+			return $this->image_url;
+		} else {
+			if( EM_MS_GLOBAL && get_current_blog_id() != $this->blog_id ){
+				switch_to_blog($this->blog_id);
+				$switch_back = true;
+			}
+			$return = parent::get_image_url($size);
+			if( !empty($switch_back) ){ restore_current_blog(); }
+		}
 		return $return;
 	}
 	
 	function get_edit_reschedule_url(){
-		if( $this->is_recurrence() ){
-			return $this->get_recurrence_set()->get_event()->get_edit_url();
+		if( $this->is_recurrence( true ) ){
+			return $this->get_recurring_event()->get_edit_url();
 		}
 	}
 	
@@ -2539,7 +2544,8 @@ class EM_Event extends EM_Object{
     								        switch_to_blog($this->blog_id);
     								        $switch_back = true;
     								    }
-								        $replace = get_the_post_thumbnail($this->ID, $image_size, array('alt' => esc_attr($this->event_name)) );
+										$post_id = $this->is_recurrence() ? $this->get_recurring_event()->post_id : $this->post_id;
+								        $replace = get_the_post_thumbnail($post_id, $image_size, array('alt' => esc_attr($this->event_name)) );
 								        if( !empty($switch_back) ){ restore_current_blog(); }
 								    }
 								}else{
@@ -2675,7 +2681,7 @@ class EM_Event extends EM_Object{
 					break;
 				case '#_RECURRINGPATTERN':
 					$replace = '';
-					if( $this->is_recurrence() || $this->is_recurring( true ) ){
+					if( $this->is_recurrence( true ) || $this->is_recurring( true ) ){
 						$replace = $this->get_event_recurrence()->get_recurrence_set()->get_recurrence_description();
 					}
 					break;
@@ -3193,8 +3199,9 @@ class EM_Event extends EM_Object{
 	 ***********************************************************/
 
 	/**
-	 * Returns true if this is a recurring event.
+	 * Returns true if this is a recurring event. Set $include_repeating to true to also evaluate repeating events as a recurring event (mainly for backwards compatibility)
 	 *
+	 * @param boolean $include_repeating
 	 * @return boolean
 	 */
 	function is_recurring( $include_repeating = false ) {
@@ -3206,10 +3213,11 @@ class EM_Event extends EM_Object{
 	 *
 	 * Unlike is_recurring() this pre-loads the Recurrence_Set into this object by default. If you don't intend to call get_recurrence_sets() right after and use the object returned, you can set $prepare_set to false.
 	 *
+	 * @param boolean $include_repeating	 *
 	 * @return boolean
 	 */
-	function is_recurrence() {
-		return (!$this->post_id || $this->event_type === 'recurrence') && $this->recurrence_set_id;
+	function is_recurrence( $include_repeating = false ) {
+		return ( !$this->post_id || $include_repeating ) && $this->event_type === 'recurrence' && $this->recurrence_set_id;
 	}
 
 	/**
@@ -3219,6 +3227,15 @@ class EM_Event extends EM_Object{
 	 */
 	function is_repeating() {
 		return $this->event_type == 'repeating' || $this->post_type == 'event-recurring';
+	}
+
+	/**
+	 * Will return true if this individual event is part of a repeating event set. Recurrences of repeating events are individual events with their own post id.
+	 *
+	 * @return boolean
+	 */
+	function is_repeated() {
+		return $this->post_id && $this->event_type === 'recurrence' && $this->recurrence_set_id;
 	}
 
 	/**
@@ -3286,7 +3303,7 @@ class EM_Event extends EM_Object{
 	 */
 	function detach(){
 		global $wpdb;
-		if( $this->is_recurrence() && $this->can_manage('edit_recurring_events','edit_others_recurring_events') ){
+		if( $this->is_repeated() && $this->can_manage('edit_recurring_events','edit_others_recurring_events') ){
 			//remove recurrence id from post meta and index table
 			$url = $this->get_attach_url();
 			$wpdb->update(EM_EVENTS_TABLE, array('recurrence_id' => null, 'recurrence_set' => null, 'event_type' => EM_POST_TYPE_EVENT ), array('event_id' => $this->event_id));
@@ -3675,7 +3692,7 @@ function em_event_gallery_override( $attr = array() ){
 	if( !empty($post->post_type) && $post->post_type == EM_POST_TYPE_EVENT && empty($attr['id']) && empty($attr['ids']) ){
 		//no id specified, so check if it's recurring and override id with recurrence template post id
 		$EM_Event = em_get_event($post->ID, 'post_id');
-		if( $EM_Event->is_recurrence() ){
+		if( $EM_Event->is_recurrence( true) ){
 			$attr['id'] = $EM_Event->get_event_recurrence()->post_id;
 		}
 	}

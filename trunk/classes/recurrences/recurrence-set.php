@@ -250,7 +250,7 @@ class Recurrence_Set extends EM_Object {
 			if ( $EM_Event->is_recurring( true ) ) {
 				$this->recurrence_set_id = $EM_Event->recurrence_set_id;
 				$this->event = $EM_Event; // add reference to EM_Event already
-			} elseif ( $EM_Event->is_recurrence() ) {
+			} elseif ( $EM_Event->is_recurrence( true ) ) {
 				$this->recurrence_set_id = $EM_Event->recurrence_set_id;
 			}
 		} elseif ( is_array($data) ) {
