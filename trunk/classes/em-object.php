@@ -427,9 +427,9 @@ class EM_Object {
 			}
 			if( get_option('dbem_events_current_are_past') ){
 				if ( $timezone_scope ) {
-					$conditions['scope'] = " ( $event_start_col BETWEEN CAST('$scope' AS $cast) AND CAST('$date_end' AS $cast) )";
+					$conditions['scope'] = " ( $event_start_col BETWEEN CAST('$date_start' AS $cast) AND CAST('$date_end' AS $cast) )";
 				} else {
-					$conditions['scope'] = "$event_start_col = CAST('$date_start' AS $cast)";
+					$conditions['scope'] = "$event_start_col = CAST('$scope' AS $cast)";
 				}
 			} else{
 				if ( $timezone_scope ) {

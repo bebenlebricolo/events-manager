@@ -500,6 +500,19 @@ class EM_Event extends EM_Object{
 		}
 		// set some type casts
 		if ( $this->event_id ) $this->event_id = absint($this->event_id);
+		// do a little cleanup if we notice anything odd from bad installs, plugin conflicts etc.
+		if ( $this->event_id && $this->is_recurring(true) ) {
+			$this->recurrence_set_id = null; // no recurrence set id for recurring and repeating
+			if ( !$this->event_start_date ) {
+				$Recurrence_Set = $this->get_recurrence_set();
+				if ( empty($this->event_timezone) ) $this->event_timezone = $Recurrence_Set->timezone;
+				if ( empty($this->event_start_date) ) $this->event_start_date = $Recurrence_Set->start_date;
+				if ( empty($this->event_start_time) || $this->event_start_time == '00:00:00' ) $this->event_start_time = $Recurrence_Set->start_time;
+				if ( empty($this->event_end_date) ) $this->event_end_date = $Recurrence_Set->end_date;
+				if ( empty($this->event_end_time) || $this->event_end_time == '00:00:00' ) $this->event_end_time = $Recurrence_Set->end_time;
+				$this->event_all_day ??= $Recurrence_Set->all_day;
+			}
+		}
 		// fire hook to add any extra info to an event
 		do_action('em_event', $this, $id, $search_by);
 		//add this event to the cache
@@ -544,13 +557,13 @@ class EM_Event extends EM_Object{
 	public function __set( $prop, $val ){
 		if( $prop == 'event_start_date' || $prop == 'event_end_date' || $prop == 'event_rsvp_date' ){
 			//if date is valid, set it, if not set it to null
-			$this->$prop = preg_match('/^\d{4}-\d{2}-\d{2}$/', $val) ? $val : null;
+			$this->$prop = $val && preg_match('/^\d{4}-\d{2}-\d{2}$/', $val) ? $val : null;
 			if( $prop == 'event_start_date') $this->start = $this->event_start = null;
 			elseif( $prop == 'event_end_date') $this->end = $this->event_end = null;
 			elseif( $prop == 'event_rsvp_date') $this->rsvp_end = null;
 		}elseif( $prop == 'event_start_time' || $prop == 'event_end_time' || $prop == 'event_rsvp_time' ){
 			//if time is valid, set it, otherwise set it to midnight
-			$this->$prop = preg_match('/^\d{2}:\d{2}:\d{2}$/', $val) ? $val : '00:00:00';
+			$this->$prop = $val && preg_match('/^\d{2}:\d{2}:\d{2}$/', $val) ? $val : '00:00:00';
 			if( $prop == 'event_start_time') $this->start = null;
 			elseif( $prop == 'event_end_time') $this->end = null;
 			elseif( $prop == 'event_rsvp_time') $this->rsvp_end = null;
@@ -1304,6 +1317,7 @@ class EM_Event extends EM_Object{
 					if( $this->previous_status != $this->get_status() ) $this->set_status($this->get_status());
 					$this->feedback_message = sprintf(__('Successfully saved %s','events-manager'),__('Event','events-manager'));
 				}
+
 				//check anonymous submission information
     			if( !empty($this->event_owner_anonymous) && get_option('dbem_events_anonymous_user') != $this->event_owner ){
     			    //anonymous user owner has been replaced with a valid wp user account, so we remove anonymous status flag but leave email and name for future reference
@@ -3433,7 +3447,11 @@ class EM_Event extends EM_Object{
 	 * @deprecated use Recurrence_Sets::get_recurrence_description() or Recurrence_Set::get_recurrence_description()
 	 */
 	function get_recurrence_description() {
-		return $this->get_recurrence_sets()->get_recurrence_description();
+		if ( $this->is_recurrence( true ) ) {
+			return $this->get_recurring_event()->get_recurrence_description();
+		} else {
+			return $this->get_recurrence_sets()->get_recurrence_description();
+		}
 	}
 	
 	/**********************************************************
