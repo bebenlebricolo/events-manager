@@ -1,7 +1,7 @@
 <?php
 /*
 Plugin Name: Events Manager
-Version: 7.0.4.2
+Version: 7.0.5
 Plugin URI: https://wp-events-plugin.com
 Description: Event registration and booking management for WordPress. Recurring events, locations, webinars, google maps, rss, ical, booking registration and more!
 Author: Pixelite
@@ -29,7 +29,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 */
 
 // Setting constants
-define('EM_VERSION', '7.0.4.2'); //self expanatory, although version currently may not correspond directly with published version number. until 6.0 we're stuck updating 5.999.x
+define('EM_VERSION', '7.0.5'); //self expanatory, although version currently may not correspond directly with published version number. until 6.0 we're stuck updating 5.999.x
 define('EM_PRO_MIN_VERSION', '3.6'); //self expanatory
 define('EM_PRO_MIN_VERSION_CRITICAL', '3.6.0.2'); //self expanatory
 define('EM_FILE', __FILE__); //an absolute path to this directory
@@ -248,6 +248,8 @@ function em_plugins_loaded(){
 	if( class_exists('\Thrive\Automator\Admin') ){
 		include( EM_DIR . '/integrations/thrive-automator/events-manager-thrive-automator.php' );
 	}
+	// duplicate posts - small so we just include it
+	include( EM_DIR . '/integrations/duplicate-post-plugins/duplicate-post-plugins.php' );
 }
 add_filter('plugins_loaded','em_plugins_loaded');
 

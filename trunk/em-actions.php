@@ -288,6 +288,16 @@ function em_init_actions_start() {
 			$results = apply_filters('em_actions_locations_search_results', $results);
 			echo EM_Object::json_encode($results);
 			die();
+		} elseif ( $_REQUEST['action'] == 'location_duplicate' && wp_verify_nonce($_REQUEST['_wpnonce'],'location_duplicate_'.$EM_Location->location_id) ) {
+			$location = $EM_Location->duplicate();
+			if( $location === false ){
+				$EM_Notices->add_error( $EM_Location->errors, true );
+				wp_safe_redirect( em_wp_get_referer() );
+			}else{
+				$EM_Notices->add_confirm( $location->feedback_message, true );
+				wp_safe_redirect( $location->get_edit_url( false ) );
+			}
+			exit();
 		}
 		if( isset($result) && $result && !empty($_REQUEST['em_ajax']) ){
 			$return = array('result'=>true, 'success'=>true, 'message'=>$EM_Location->feedback_message);

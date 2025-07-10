@@ -505,12 +505,12 @@ class EM_Event extends EM_Object{
 			$this->recurrence_set_id = null; // no recurrence set id for recurring and repeating
 			if ( !$this->event_start_date ) {
 				$Recurrence_Set = $this->get_recurrence_set();
-				if ( empty($this->event_timezone) ) $this->event_timezone = $Recurrence_Set->timezone;
-				if ( empty($this->event_start_date) ) $this->event_start_date = $Recurrence_Set->start_date;
-				if ( empty($this->event_start_time) || $this->event_start_time == '00:00:00' ) $this->event_start_time = $Recurrence_Set->start_time;
-				if ( empty($this->event_end_date) ) $this->event_end_date = $Recurrence_Set->end_date;
-				if ( empty($this->event_end_time) || $this->event_end_time == '00:00:00' ) $this->event_end_time = $Recurrence_Set->end_time;
-				$this->event_all_day ??= $Recurrence_Set->all_day;
+				if ( empty($this->event_timezone) ) $this->event_timezone = $Recurrence_Set->timezone ?? get_option('dbem_timezone_default');
+				if ( empty($this->event_start_date) ) $this->event_start_date = $Recurrence_Set->start_date ?? date('Y-m-d');
+				if ( empty($this->event_start_time) || $this->event_start_time == '00:00:00' ) $this->event_start_time = $Recurrence_Set->start_time ?? '00:00:00';
+				if ( empty($this->event_end_date) ) $this->event_end_date = $Recurrence_Set->end_date ?? date('Y-m-d');
+				if ( empty($this->event_end_time) || $this->event_end_time == '00:00:00' ) $this->event_end_time = $Recurrence_Set->end_time ?? '00:00:00';
+				$this->event_all_day ??= $Recurrence_Set->all_day ?? false;
 			}
 		}
 		// fire hook to add any extra info to an event
@@ -1467,10 +1467,11 @@ class EM_Event extends EM_Object{
 		return apply_filters('em_event_duplicate', false, $this);;
 	}
 	
-	function duplicate_url($raw = false){
-	    $url = add_query_arg(array('action'=>'event_duplicate', 'event_id'=>$this->event_id, '_wpnonce'=> wp_create_nonce('event_duplicate_'.$this->event_id)));
+	function duplicate_url( $raw = false ){
+		$url = preg_match('/^https?\:\/\//', $raw ) ? $raw : false;
+	    $url = add_query_arg(array('action'=>'event_duplicate', 'event_id'=>$this->event_id, '_wpnonce'=> wp_create_nonce('event_duplicate_'.$this->event_id)), $url);
 	    $url = apply_filters('em_event_duplicate_url', $url, $this);
-	    $url = $raw ? esc_url_raw($url):esc_url($url);
+	    $url = $raw === false ? esc_url_raw($url) : esc_url($url);
 	    return $url;
 	}
 
