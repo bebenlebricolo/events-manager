@@ -164,7 +164,7 @@ See our [FAQ](http://wp-events-plugin.com/documentation/faq/) page for helps wit
 18. Grid view for displaying your upcoming events at a glance
 
 == Changelog ==
-= 7.0.5.1 (dev) =
+= 7.0.5.2 (dev) =
 * Fixed pagination errors when events list default scope is selected as 'all'
 * Added new event list scope default option which is the base scope for shortcodes, widgets, functions etc. outside the events page (found on settings page)
 

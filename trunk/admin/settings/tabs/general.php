@@ -5,13 +5,14 @@
 	<div class="handlediv" title="<?php __('Click to toggle', 'events-manager'); ?>"><br /></div> <h3><span><?php _e ( 'General Options', 'events-manager'); ?> </span></h3>
 	<div class="inside">
         <table class="form-table">
-            <?php em_options_radio_binary ( __( 'Disable thumbnails?', 'events-manager'), 'dbem_thumbnails_enabled', __( 'Select yes to disable Events Manager from enabling thumbnails (some themes may already have this enabled, which we cannot be turned off here).','events-manager') );  ?>					
+            <?php em_options_radio_binary ( __( 'Disable thumbnails?', 'events-manager'), 'dbem_thumbnails_enabled', __( 'Select yes to disable Events Manager from enabling thumbnails (some themes may already have this enabled, which we cannot be turned off here).','events-manager') ); ?>
 			<tr class="em-header">
 				<td colspan="2">
 					<h4><?php echo sprintf(__('%s Settings','events-manager'),__('Event','events-manager')); ?></h4>
 				</td>
 			</tr>
 			<?php
+			em_options_select( __('Default List Scope','events-manager'), 'dbem_events_default_scope', em_get_scopes(), __('Default scope to show your events in shortcodes, widgets and any other displays where scope is not defined. Events page and archive scopes can be defined in the %s settings section.','events-manager') );
 			em_options_radio_binary ( __( 'Enable Timezone Support?', 'events-manager'), 'dbem_timezone_enabled', sprintf(__( 'Each event can have its own timezone if enabled. If set to no, then all newly created events will have the blog timezone, which currently is set to %s','events-manager'), '<code>'.EM_DateTimeZone::create()->getName().'</code>'), '', '.event-timezone-option' );
 			em_options_radio_binary ( __( 'Enable Event Status?', 'events-manager'), 'dbem_event_status_enabled', sprintf(__( 'Events can have a status associated with them, such as a cancelled event, which can then be filtered out of search listings. By default, or if disabled, events have an %s status.','events-manager'), '<code>'. __('Active', 'events-manager') .'</code>'), '', '.event-active-status-option' );
 			?>
