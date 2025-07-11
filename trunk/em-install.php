@@ -511,6 +511,7 @@ function em_add_options() {
 		'dbem_events_default_orderby' => 'event_start_date,event_start_time,event_name',
 		'dbem_events_default_order' => 'ASC',
 		'dbem_events_default_limit' => 10,
+		'dbem_events_default_scope' => 'future', // found on general settings, overriding the event_page scope for general scope choices, due to defaulting issues in <7.0.6
 		//Event Search Options
 		'dbem_search_form_main' => 1,
 		'dbem_search_form_responsive' => $already_installed ? 'one-line' : 'multi-line',

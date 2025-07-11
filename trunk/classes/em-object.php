@@ -44,7 +44,7 @@ class EM_Object {
 		$super_defaults = array(
 			'id' => rand(),
 			'limit' => false,
-			'scope' => 'future',
+			'scope' => get_option('dbem_events_default_scope', 'future'),
 			'timezone' => false, //default blog timezone
 			'timezone_scope' => false, // search based on a specific timezone, rather than based off local times
 			'order' => 'ASC', //hard-coded at end of this function

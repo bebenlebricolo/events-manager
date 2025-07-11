@@ -623,7 +623,7 @@ function em_get_search_form_defaults($base_args = array(), $context = 'events') 
 	$search_args['near_distance'] = get_option('dbem_search_form_geo_distance_default'); //default distance amount
 	$search_args['geo_distance_values'] = explode(',', get_option('dbem_search_form_geo_distance_options')); //possible distance values
 	//scope
-	$search_args['scope'] = array('', '', 'name' => 'all'); //default scope term
+	$search_args['scope'] = array('', '', 'name' => get_option('dbem_events_default_scope')); //default scope term
 	$search_args['search_scope'] = get_option('dbem_search_form_dates'); // show in main form
 	$search_args['scope_label'] = get_option('dbem_search_form_dates_label'); //field label
 	$search_args['scope_seperator'] = get_option('dbem_search_form_dates_separator'); //field label

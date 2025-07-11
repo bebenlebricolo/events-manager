@@ -798,7 +798,6 @@ function em_ajax_search_and_pagination(){
 	if( $_REQUEST['action'] == 'search_events' ){
 		// new and default way of doing things
 		$view = !empty($_REQUEST['view']) && preg_match('/^[a-zA-Z0-9-_]+$/', $_REQUEST['view']) ? $_REQUEST['view'] : 'list';
-		$args['scope'] = get_option('dbem_events_page_scope');
 		$args = EM_Events::get_post_search($args);
         if( get_option('dbem_search_form_cookies', true) ) {
 	        if ( empty( $_REQUEST['clear_search'] ) ) {
@@ -849,7 +848,6 @@ function em_ajax_search_and_pagination(){
 	}else{
 		if( $_REQUEST['action'] == 'search_events_grouped' && defined('DOING_AJAX') ) {
 			// legacy
-			$args['scope'] = get_option('dbem_events_page_scope');
 			$args = EM_Events::get_post_search($args);
             // set cookies if relevant
 			if( get_option('dbem_search_form_cookies', true) ) {
