@@ -32,6 +32,9 @@ Events Manager is a full-featured event calendar, bookings and registration mana
  * Network-wide Global Booking Management
  * BuddyPress and BuddyBoss Support
  * Create modular (independent) event subsites or inter-networked events
+* **NEW** Multiple custom event types (Archetypes), such as Workshops, Events, Webinars, Appointments etc.
+ * Customize your labels, slugs and CPT names
+ * Enable or disable specific features for specific event archetypes.
 * Multiple Location Types
  * Physical Locations
  * Online Events (URLs)
@@ -54,7 +57,7 @@ Events Manager is a full-featured event calendar, bookings and registration mana
 * Add to Google Calendar buttons
 * RSS Feeds
 * Compatible with SEO plugins
-* Timezone Support - create events in different timezones 
+* Timezone Support - create events in different timezones
 * Plenty of template tags and shortcodes for use in your posts and pages
 * Actively maintained and supported
 * Lots of documentation and tutorials
