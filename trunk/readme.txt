@@ -5,7 +5,7 @@ Tags: events, calendar, tickets, bookings, appointments
 Text Domain: events-manager
 Requires at least: 6.1
 Tested up to: 6.8
-Stable tag: 7.1
+Stable tag: 7.1.1
 Requires PHP: 7.0
 License: GPLv2
 
@@ -167,6 +167,11 @@ See our [FAQ](http://wp-events-plugin.com/documentation/faq/) page for helps wit
 18. Grid view for displaying your upcoming events at a glance
 
 == Changelog ==
+= 7.1.1 =
+* Fixed events, locations and archetypes not using gutenberg when EM_GUTENBERG is set to true
+* Fixed capability issues preventing repeating events from being edited
+* Fixed JS validation preventing dashes being used in new custom archetypes
+
 = 7.1 =
 * Rewritten custom posts architecture to introduce Archetypes; create multiple event CPTs running off Events Manager infrastructure with individually customizable settings (formats, enabled/disabled features, etc.)
 * Added functionality to rename labels and CPTs of main event CPT and locations

@@ -200,6 +200,7 @@ archetypes.addEventListener('input', function(e) {
 // Validate archetype data
 function validateArchetype( item ) {
 	let valid = true;
+	let filled = true;
 	const label = item.querySelector( '.archetype-label' ).value.trim();
 	const labelSingle = item.querySelector( '.archetype-label-single' ).value.trim();
 	const slug = item.querySelector( '.archetype-slug' ).value.trim();
@@ -215,27 +216,27 @@ function validateArchetype( item ) {
 	// Check required fields
 	if ( !label ) {
 		item.querySelector( '.archetype-label' ).style.borderColor = 'red';
-		valid = false;
+		filled = false;
 	}
 
 	if ( !labelSingle ) {
 		item.querySelector( '.archetype-label-single' ).style.borderColor = 'red';
-		valid = false;
+		filled = false;
 	}
 
 	if ( !slug ) {
 		item.querySelector( '.archetype-slug' ).style.borderColor = 'red';
-		valid = false;
+		filled = false;
 	}
 
 	if ( !cpt ) {
 		item.querySelector( '.archetype-cpt' ).style.borderColor = 'red';
-		valid = false;
+		filled = false;
 	}
 
 	if ( !cpts ) {
 		item.querySelector( '.archetype-cpts' ).style.borderColor = 'red';
-		valid = false;
+		filled = false;
 	}
 
 	// Validate slug format (lowercase, no spaces, allow slashes and hyphens)
@@ -247,14 +248,14 @@ function validateArchetype( item ) {
 
 	// Validate CPT format (lowercase, no spaces, etc.)
 	let cptInput = item.querySelector( '.archetype-cpt' );
-	if ( !cptInput.disabled && cpt && !/^[a-z0-9_]+$/.test( cpt ) ) {
+	if ( !cptInput.disabled && cpt && !/^[a-z0-9_-]+$/.test( cpt ) ) {
 		alert( i18n.error_cpt_format );
 		cptInput.style.borderColor = 'red';
 		valid = false;
 	}
 
 	let cptsInput = item.querySelector( '.archetype-cpts' );
-	if ( !cptsInput.disabled && cpts && !/^[a-z0-9_]+$/.test( cpts ) ) {
+	if ( !cptsInput.disabled && cpts && !/^[a-z0-9_-]+$/.test( cpts ) ) {
 		alert( i18n.error_cpts_format );
 		cptsInput.style.borderColor = 'red';
 		valid = false;
@@ -262,7 +263,7 @@ function validateArchetype( item ) {
 
 	// Check CPT does not conflict with existing WP post types
 	if ( !cptInput.disabled && cpt && postTypes.includes(cpt.toLowerCase()) ) {
-		alert( i18n.error_cpt_exists || 'This CPT name is already used by an existing WordPress post type. Please choose another name.' );
+		alert( i18n.error_cpt_exists );
 		item.querySelector( '.archetype-cpt' ).style.borderColor = 'red';
 		valid = false;
 	}
@@ -282,11 +283,11 @@ function validateArchetype( item ) {
 		valid = false;
 	}
 
-	if ( !valid ) {
+	if ( !filled ) {
 		alert( i18n.error_required_fields );
 	}
 
-	return valid;
+	return valid && filled;
 }
 
 // Update the display view generically based on data-name and preview classes
@@ -386,56 +387,6 @@ function toggleArchetypesUI() {
 toggleArchetypesUI();
 document.querySelector( 'select[name="dbem_ms_archetypes_mode"]' )?.addEventListener( 'change', toggleArchetypesUI );
 
-// CPT validation function
-function validateCPTField(input) {
-	const value = input.value;
-	const maxLength = 20;
-	const cptPattern = /^[a-z0-9_-]*$/;
-
-	let isValid = true;
-	let errorMessage = '';
-
-	// Check length
-	if (value.length > maxLength) {
-		isValid = false;
-		errorMessage = 'Maximum 20 characters allowed.';
-	}
-
-	// Check format (alphanumeric, hyphens, underscores only)
-	if (!cptPattern.test(value)) {
-		isValid = false;
-		errorMessage = 'Only lowercase alphanumeric characters, hyphens, and underscores allowed.';
-	}
-
-	// Visual feedback
-	if (isValid) {
-		input.style.borderColor = '';
-		input.style.backgroundColor = '';
-	} else {
-		input.style.borderColor = '#dc3232';
-		input.style.backgroundColor = '#ffeaea';
-	}
-
-	// Show/hide error message
-	let errorSpan = input.parentElement.querySelector('.cpt-validation-error');
-	if (!isValid) {
-		if (!errorSpan) {
-			errorSpan = document.createElement('span');
-			errorSpan.className = 'cpt-validation-error';
-			errorSpan.style.color = '#dc3232';
-			errorSpan.style.fontSize = '12px';
-			errorSpan.style.display = 'block';
-			errorSpan.style.marginTop = '3px';
-			input.parentElement.appendChild(errorSpan);
-		}
-		errorSpan.textContent = errorMessage;
-	} else if (errorSpan) {
-		errorSpan.remove();
-	}
-
-	return isValid;
-}
-
 // Normalize accented characters to base characters
 function normalizeAccents(str) {
 	const accentMap = {
@@ -484,7 +435,6 @@ function autoPopulateSingularCPT(labelValue, cptInput) {
 		.substring(0, 20); // Limit to 20 chars
 
 	cptInput.value = cptValue;
-	validateCPTField(cptInput);
 }
 
 // Auto-populate CPTs field from plural label
@@ -501,7 +451,6 @@ function autoPopulatePluralCPT(labelValue, cptsInput) {
 		.substring(0, 20); // Limit to 20 chars
 
 	cptsInput.value = cptsValue;
-	validateCPTField(cptsInput);
 }
 
 // Mark CPT fields as edited when they are directly changed by the user
@@ -570,49 +519,8 @@ container.addEventListener('blur', function(e) {
 	}
 }, true);
 
-// Slug validation function (letters, numbers, hyphens and slashes)
-function validateSlugField(input){
-	const original = input.value;
-	// Normalize accents, force lowercase, keep only a-z, 0-9, hyphen and slash
-	let cleaned = normalizeAccents(original)
-		.toLowerCase()
-		.replace(/[^a-z0-9\/-]/g, '');
-	if (cleaned !== original){
-		const selStart = input.selectionStart;
-		const delta = original.length - cleaned.length;
-		input.value = cleaned;
-		try { input.setSelectionRange(Math.max(0, (selStart||0) - Math.max(0, delta)), Math.max(0, (selStart||0) - Math.max(0, delta))); } catch(e) {}
-	}
-	// Visual feedback similar to CPT
-	const isValid = /^[a-z0-9\/-]*$/.test(input.value);
-	if (isValid) {
-		input.style.borderColor = '';
-		input.style.backgroundColor = '';
-	} else {
-		input.style.borderColor = '#dc3232';
-		input.style.backgroundColor = '#ffeaea';
-	}
-	return isValid;
-}
-
 // Use delegated event listener for all inputs
 container.addEventListener('input', function(e) {
-	// Handle custom archetype and base slugs: enforce valid chars and lowercase
-	if ( e.target.classList.contains('archetype-slug') || e.target.id === 'dbem_cp_events_slug' || e.target.id === 'dbem_cp_locations_slug' ) {
-		let input = e.target;
-		validateSlugField(input);
-		const codeTag = input.parentElement.querySelector('code');
-		if ( codeTag ) {
-			// Update code tag with input value
-			codeTag.textContent = input.value || input.placeholder;
-		}
-	}
-
-	// Handle CPT field validation
-	if ( e.target.id === 'em_cp_events_cpt' || e.target.id === 'em_cp_events_cpts' || e.target.classList.contains('archetype-cpt') || e.target.classList.contains('archetype-cpts')) {
-		validateCPTField(e.target);
-	}
-
 	// Handle auto-population from archetype labels (only for custom archetypes)
 	if (e.target.classList.contains('archetype-label') || e.target.classList.contains('archetype-label-single')) {
 		const item = e.target.closest('.archetype-item');

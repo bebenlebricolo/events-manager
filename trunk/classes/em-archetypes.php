@@ -39,7 +39,7 @@ class Archetypes {
 		static::$event = [
 			'cpt' => $event_cpt,
 			'cpts' => get_option('em_cp_events_cpts') ?: $event_cpt . 's',
-			'show_in_rest' => defined('\EM_GUTENBERG') && \EM_GUTENBERG,
+			'show_in_rest' => defined('EM_GUTENBERG') && EM_GUTENBERG,
 			'slug' => get_option('dbem_cp_events_slug', 'events'),
 			'label' => get_option('dbem_cp_events_label', __('Events', 'events-manager') ),
 			'label_single' => get_option('dbem_cp_events_label_single', __('Event', 'events-manager') ),
@@ -77,7 +77,7 @@ class Archetypes {
 		define( 'EM_POST_TYPE_LOCATION_SLUG', Archetypes::$location['slug'] ?? 'locations' );
 
 		// Deal with Gutenberg
-		if( defined('\EM_GUTENBERG') && \EM_GUTENBERG ){
+		if( defined('EM_GUTENBERG') && EM_GUTENBERG ){
 			add_filter('gutenberg_can_edit_post_type', [ static::class, 'gutenberg_can_edit_post_type' ], 10, 2 ); //Gutenberg
 		}
 
@@ -325,6 +325,7 @@ class Archetypes {
 				'show_ui' => true,
 				'show_in_menu' => true,
 				'show_in_nav_menus'=>true,
+				'show_in_rest' => defined('EM_GUTENBERG') && EM_GUTENBERG,
 				'can_export' => true,
 				'exclude_from_search' => !get_option('dbem_cp_events_search_results'),
 				'publicly_queryable' => true,
@@ -519,32 +520,24 @@ class Archetypes {
 			$post = get_post($args[0]);
 			//check for revisions and deal with non-event post types
 			if( !empty($post->post_type) && $post->post_type == 'revision' ) $post = get_post($post->post_parent);
-			if( empty($post->post_type) || !self::is_valid_cpt( $post->post_type ) ) return $caps;
+			if( empty($post->post_type) || !(self::is_event( $post->post_type ) || self::is_location( $post->post_type )) ) return $caps;
 
-			// create cap sets
-			$read_caps = [ static::$event['cpt'] => 'read_event',  static::$location['cpt'] ?? 'location' => 'read_location'];
-			$edit_caps = [ static::$event['cpt'] => 'edit_event', static::$location['cpt'] ?? 'location' => 'edit_location'];
-			$delete_caps = [ static::$event['cpt'] => 'delete_event', static::$location['cpt'] ?? 'location' => 'delete_location'];
+			$c = [ 'read' => [], 'edit' => [], 'delete' => [] ];
 
-			foreach (static::$types as $cpt => $type) {
-				if ( !empty($type['capabilities']) && is_array($type['capabilities']) ) {
-					$read_caps[$cpt] = $type['capabilities']['read_post'];
-					$edit_caps[$cpt] = $type['capabilities']['edit_post'];
-					$delete_caps[$cpt] = $type['capabilities']['delete_post'];
-				} else {
-					$caps = static::generate_capabilities( $type );
-					$read_caps[$cpt] = $caps['read_post'];
-					$edit_caps[$cpt] = $caps['edit_post'];
-					$delete_caps[$cpt] = $caps['delete_post'];
-				}
+			$c = static::map_meta_cap_type( $c, static::$event );
+			if ( static::$location ) {
+				$c = static::map_meta_cap_type( $c, static::$location );
+			}
+			foreach ( static::$types as $archetype ) {
+				$c = static::map_meta_cap_type( $c, $archetype );
 			}
 
-			if ( !empty( $read_caps[$post->post_type] ) || !empty( $edit_caps[$post->post_type] ) || !empty( $delete_caps[$post->post_type] ) ) {
+			if ( !empty( $c['read'][$post->post_type] ) || !empty( $c['edit'][$post->post_type] ) || !empty( $c['delete'][$post->post_type] ) ) {
 				/* Set an empty array for the caps. */
 				$caps = [];
 
 				//Filter according to caps
-				if ( $read_caps[$post->post_type] == $cap ) {
+				if ( $c['read'][$post->post_type] == $cap ) {
 					if ( 'private' != $post->post_status ) {
 						$caps[] = 'read';
 					} elseif ( $user_id == $post->post_author ) {
@@ -553,14 +546,14 @@ class Archetypes {
 						$post_type = get_post_type_object( $post->post_type );
 						$caps[] = $post_type->cap->read_private_posts;
 					}
-				} elseif ( $edit_caps[$post->post_type] == $cap  ) {
+				} elseif ( $c['edit'][$post->post_type] == $cap  ) {
 					$post_type = get_post_type_object( $post->post_type );
 					if ( $user_id == $post->post_author ) {
 						$caps[] = $post_type->cap->edit_posts;
 					} else {
 						$caps[] = $post_type->cap->edit_others_posts;
 					}
-				} elseif ( $delete_caps[$post->post_type] == $cap ) {
+				} elseif ( $c['delete'][$post->post_type] == $cap ) {
 					$post_type = get_post_type_object( $post->post_type );
 					if ( $user_id == $post->post_author ) {
 						$caps[] = $post_type->cap->delete_posts;
@@ -574,6 +567,38 @@ class Archetypes {
 		/* Return the capabilities required by the user. */
 
 		return $caps;
+	}
+
+	public static function map_meta_cap_repeating( $c, $archetype ) {
+		if ( !empty($archetype['repeating']) ) {
+			$repeating = $archetype['repeating'];
+			if ( !is_array( $repeating ) ) {
+				$suffix = $archetype['cpt'] === EM_POST_TYPE_EVENT ? '-recurring' : '-repeating';
+				$repeating = [ // specifically keyed event_recurring to trigger legacy filter em_cpt_event_recurring
+					'cpt' => $archetype['cpt'] . $suffix,
+					'capability_type' => ['event', 'events'],
+				];
+			}
+			return static::map_meta_cap_type( $c, $repeating );
+		}
+		return $c;
+	}
+
+	public static function map_meta_cap_type( $c, $archetype ) {
+		// create cap sets
+		$cpt = $archetype['cpt'];
+		if ( !empty($type['capabilities']) && is_array($type['capabilities']) ) {
+			$c['read'][$cpt] = $type['capabilities']['read_post'];
+			$c['edit'][$cpt] = $type['capabilities']['edit_post'];
+			$c['delete'][$cpt] = $type['capabilities']['delete_post'];
+		} else {
+			$caps = static::generate_capabilities( $archetype );
+			$c['read'][$cpt] = $caps['read_post'];
+			$c['edit'][$cpt] = $caps['edit_post'];
+			$c['delete'][$cpt] = $caps['delete_post'];
+		}
+		$c = static::map_meta_cap_repeating( $c, $archetype );
+		return $c;
 	}
 
 	public static function map_meta_map_check( $args ) {
@@ -625,12 +650,12 @@ class Archetypes {
 			$valid_cpts[] = static::$location['cpt'];
 		}
 		if ( ( !$include || in_array( 'repeating', $include ) ) && !in_array( 'repeating', $exclude ) ) {
-			if ( !empty( $event_included ) && !empty( static::$event['repeating'] ) ) {
-				$valid_cpts[] = !empty( static::$event['repeating']['cpt'] ) ? static::$event['repeating']['cpt'] : static::$event['cpt'] . '-repeating';
+			if ( !empty( static::$event['repeating'] ) ) {
+				$valid_cpts[] = static::$event['repeating']['cpt'] ?? static::$event['cpt'] . '-recurring';
 			}
 			foreach ( static::$types as $archetype ) {
 				if ( !empty( $archetype['repeating'] ) ) {
-					$valid_cpts[] = !empty( $archetype['repeating']['cpt'] ) ? $archetype['repeating']['cpt'] : $archetype['cpt'] . '-repeating';
+					$valid_cpts[] = $archetype['repeating']['cpt'] ?? $archetype['cpt'] . '-repeating';
 				}
 			}
 		}
@@ -661,10 +686,24 @@ class Archetypes {
 		$cpt = static::get_post_type( $cpt );
 		if ( $include_repeating ) {
 			// check repeating too
-			return $cpt && in_array( $cpt, static::get_cpts( ['location', 'repeating'] ) );
+			return $cpt && in_array( $cpt, static::get_cpts( ['location'] ) );
 		} else {
 			return $cpt && in_array( $cpt, [ static::$event['cpt'], ...array_keys( static::$types ) ] );
 		}
+	}
+
+	/**
+	 * Checks if a post type is a location, accepts, a post type string, post or location object.
+	 * You can also pass falsy values to trigger false results if using shorthand ?? to check post or request variables.
+	 *
+	 * @param string|\EM_Event|\WP_Post|false $cpt
+	 * @param bool $include_repeating   Include repeating event CPTs in the check
+	 *
+	 * @return bool
+	 */
+	public static function is_location( $cpt ) {
+		$cpt = static::get_post_type( $cpt );
+		return $cpt && static::$location['cpt'] ?? null === $cpt;
 	}
 
 	/**
