@@ -5,7 +5,7 @@ Tags: events, calendar, tickets, bookings, appointments
 Text Domain: events-manager
 Requires at least: 6.1
 Tested up to: 6.8
-Stable tag: 7.1.1
+Stable tag: 7.1.2
 Requires PHP: 7.0
 License: GPLv2
 
@@ -167,6 +167,11 @@ See our [FAQ](http://wp-events-plugin.com/documentation/faq/) page for helps wit
 18. Grid view for displaying your upcoming events at a glance
 
 == Changelog ==
+= 7.1.2 =
+* Fixed issues with displaying newly created locations in listings due to eventless state since 7.1
+* Fixed pagination issues for locations since 7.1
+* Fixed formatting settings tab hiding formats settings text boxes in super advanced mode since 7.1
+
 = 7.1.1 =
 * Fixed events, locations and archetypes not using gutenberg when EM_GUTENBERG is set to true
 * Fixed capability issues preventing repeating events from being edited
