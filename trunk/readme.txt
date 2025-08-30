@@ -5,7 +5,7 @@ Tags: events, calendar, tickets, bookings, appointments
 Text Domain: events-manager
 Requires at least: 6.1
 Tested up to: 6.8
-Stable tag: 7.1.2
+Stable tag: 7.1.3
 Requires PHP: 7.0
 License: GPLv2
 
@@ -167,6 +167,12 @@ See our [FAQ](http://wp-events-plugin.com/documentation/faq/) page for helps wit
 18. Grid view for displaying your upcoming events at a glance
 
 == Changelog ==
+= 7.1.3 =
+* Fixed new archetype data not being added to wp_postmeta for previously created events,
+* Fixed edit booking links,
+* Fixed view/edit booking page triggering AJAX instead of page reload,
+* Fixed adding attendees whilst editing a booking showing attendee summary instead of the edit form (Pro inherited feature fix)
+
 = 7.1.2 =
 * Fixed issues with displaying newly created locations in listings due to eventless state since 7.1
 * Fixed pagination issues for locations since 7.1
