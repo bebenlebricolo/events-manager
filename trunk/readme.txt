@@ -5,7 +5,7 @@ Tags: events, calendar, tickets, bookings, appointments
 Text Domain: events-manager
 Requires at least: 6.1
 Tested up to: 6.8
-Stable tag: 7.1.5
+Stable tag: 7.1.6
 Requires PHP: 7.0
 License: GPLv2
 
@@ -167,6 +167,9 @@ See our [FAQ](http://wp-events-plugin.com/documentation/faq/) page for helps wit
 18. Grid view for displaying your upcoming events at a glance
 
 == Changelog ==
+= 7.1.6 =
+* Fixed admin menu navigation issues between EM admin pages where page=events-manager-* in the URL, due to new archetypes feature in 7.1
+
 = 7.1.5 =
 * Fixed missing event list items due to change in 7.1 event_type 'event' to 'single'
 
