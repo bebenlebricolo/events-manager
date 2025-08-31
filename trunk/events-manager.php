@@ -2,7 +2,7 @@
 
 /*
 Plugin Name: Events Manager
-Version: 7.1.4
+Version: 7.1.5
 Plugin URI: https://wp-events-plugin.com
 Description: Event registration and booking management for WordPress. Recurring events, locations, webinars, google maps, rss, ical, booking registration and more!
 Author: Pixelite
@@ -29,7 +29,9 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 */
 
 // Setting constants
-define('EM_VERSION', '7.1.4'); //self expanatory, although version currently may not correspond directly with published version number. until 6.0 we're stuck updating 5.999.x
+use EM\Archetypes;
+
+define('EM_VERSION', '7.1.5'); //self expanatory, although version currently may not correspond directly with published version number. until 6.0 we're stuck updating 5.999.x
 define('EM_PRO_MIN_VERSION', '3.7'); //self expanatory
 define('EM_PRO_MIN_VERSION_CRITICAL', '3.6.0.2'); //self expanatory
 define('EM_FILE', __FILE__); //an absolute path to this directory
@@ -359,7 +361,7 @@ function em_load_event(){
 		$EM_Recurrences = array();
 		if( isset( $_REQUEST['event_id'] ) && is_numeric($_REQUEST['event_id']) && !is_object($EM_Event) ){
 			$EM_Event = new EM_Event( absint($_REQUEST['event_id']) );
-		}elseif( isset($_REQUEST['post']) && (get_post_type($_REQUEST['post']) == 'event' || get_post_type($_REQUEST['post']) == 'event-recurring') ){
+		}elseif( isset($_REQUEST['post']) && Archetypes::is_event( $_REQUEST['post'] ) ){
 			$EM_Event = em_get_event($_REQUEST['post'], 'post_id');
 		}elseif ( !empty($_REQUEST['event_slug']) && EM_MS_GLOBAL && is_main_site() && !get_site_option('dbem_ms_global_events_links')) {
 			// single event page for a subsite event being shown on the main blog
@@ -375,7 +377,7 @@ function em_load_event(){
 		}
 		if( isset($_REQUEST['location_id']) && is_numeric($_REQUEST['location_id']) && !is_object($EM_Location) ){
 			$EM_Location = new EM_Location( absint($_REQUEST['location_id']) );
-		}elseif( isset($_REQUEST['post']) && get_post_type($_REQUEST['post']) == 'location' ){
+		}elseif( isset($_REQUEST['post']) && get_post_type($_REQUEST['post']) == EM_POST_TYPE_LOCATION ){
 			$EM_Location = em_get_location($_REQUEST['post'], 'post_id');
 		}elseif ( !empty($_REQUEST['location_slug']) && EM_MS_GLOBAL && is_main_site() && !get_site_option('dbem_ms_global_locations_links')) {
 			// single event page for a subsite event being shown on the main blog
