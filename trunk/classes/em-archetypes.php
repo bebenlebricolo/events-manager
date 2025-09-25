@@ -294,7 +294,7 @@ class Archetypes {
 			}
 			$value = apply_filters( 'em_archetype_get_option_' . $option, $value ?? get_option( $option ), $archetype, $default );
 		} else {
-			$value = get_option( $option );
+			$value = get_option( $option, $default );
 		}
 
 		return $value;

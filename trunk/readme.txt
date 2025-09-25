@@ -5,15 +5,15 @@ Tags: events, calendar, tickets, bookings, appointments
 Text Domain: events-manager
 Requires at least: 6.1
 Tested up to: 6.8
-Stable tag: 7.1.7
+Stable tag: 7.2
 Requires PHP: 7.0
 License: GPLv2
 
-Fully featured events calendar, booking registration (RSVP), recurring events, locations management, Google Maps
+Fully featured events calendar, booking registration, appointments, recurring events, locations management, Google Maps
 
 == Description ==
 
-Events Manager is a full-featured event calendar, bookings and registration management plugin for WordPress based on the principles of flexibility, reliability and powerful features!
+Events Manager is a full-featured event calendar, bookings, appointments and registration management plugin for WordPress based on the principles of flexibility, reliability and powerful features!
 
 * [Demo](https://eventsmanager.site)
 * [Documentation](http://wp-events-plugin.com/documentation/)
@@ -24,6 +24,10 @@ Events Manager is a full-featured event calendar, bookings and registration mana
 * Beautiful calendars, search pages, lists, grids and booking forms to enhance your site events.
 * Easy event registration (single day with start/end times)
 * Recurring and long (multi-day) event registration
+ * Build complex recurrence patterns with exclusion/blackout dates
+* **NEW** Multiple timeslots within the day for events with advanced creation options
+ * Overlapping timeslots
+ * Buffer between timeslots
 * Bookings Management (including approval/rejections, export CVS, and more!)
 * Multiple Tickets
 * Fully-featured graph and statistics including bar/line/pie with comparison and stacking
@@ -83,6 +87,7 @@ We have a premium [Pro add-on for Events Manager](http://eventsmanagerpro.com/go
 * Printable Invoices and Tickets
 * Send PDF tickets/invoices by email automatically
 * Check In/Out
+* Move bookings to other dates/times
 * QR Scanning
  * Manage bookings on your phone
  * Check In/Out users
@@ -167,6 +172,12 @@ See our [FAQ](http://wp-events-plugin.com/documentation/faq/) page for helps wit
 18. Grid view for displaying your upcoming events at a glance
 
 == Changelog ==
+= 7.2 =
+* MAJOR - Added multiple time range and dynamic timeslot support for single and recurring events
+* Event IDs can now be comprised of format `123:123` where the `:123` represents a timeslot ID
+* `EM_Event->event_id` now supplies the full event UID, whereas `EM_Event->get_event_id()` supplies just the numeric event ID
+* Fixed default option for em_get_option() not being used when defaulting to get_option()
+
 = 7.1.7 =
 * Fixed PHP `_load_text_domain` warning since 7.1
 * Fixed PHP fatal error when viewing events page with certain settings combinations (e.g., title rewriting disabled or subsite events shown on the mainsite in MS global mode)
@@ -198,7 +209,7 @@ See our [FAQ](http://wp-events-plugin.com/documentation/faq/) page for helps wit
 * Fixed JS validation preventing dashes being used in new custom archetypes
 
 = 7.1 =
-* Rewritten custom posts architecture to introduce Archetypes; create multiple event CPTs running off Events Manager infrastructure with individually customizable settings (formats, enabled/disabled features, etc.)
+* MAJOR - Rewritten custom posts architecture to introduce Archetypes; create multiple event CPTs running off Events Manager infrastructure with individually customizable settings (formats, enabled/disabled features, etc.)
 * Added functionality to rename labels and CPTs of main event CPT and locations
 * Changed event_type single 'event' type to 'single' to avoid confusion with CPTs
 * Added fix and warning for when location Google coordinates aren’t originally saved and location editor is reopened, prompting user to re-save with updated coordinates

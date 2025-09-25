@@ -1,4 +1,4 @@
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('em_event_editor_ready', function() {
 
 	// load event recurrence data
 	document.querySelectorAll('.em-recurrence-sets').forEach( function( recurrenceSets ) {
@@ -9,7 +9,7 @@ document.addEventListener('DOMContentLoaded', function() {
 	// Event Status Warning
 	document.querySelectorAll('select[name="event_active_status"]').forEach(select => {
 		select.addEventListener('change', function (event) {
-			if ( select.value === '0' && !confirm( EM.event_cancellations.warning.replace(/\\n/g, '\n') ) ) {
+			if ( select.value === '0' && !confirm( EM.event_cancellations.warning.replace(/\\n/g, '\n') ) ) { 
 				event.preventDefault();
 			}
 		});

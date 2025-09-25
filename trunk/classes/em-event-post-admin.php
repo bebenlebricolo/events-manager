@@ -16,6 +16,8 @@ class EM_Event_Post_Admin{
 			}
 			//Notices
 			add_action('admin_notices',array('EM_Event_Post_Admin','admin_notices'));
+			// Add body class for event editor styling
+			add_filter('admin_body_class', array('EM_Event_Post_Admin','admin_body_class'));
 		}
 		//Save/Edit actions
 		add_filter('wp_insert_post_data',array('EM_Event_Post_Admin','wp_insert_post_data'),100,2); //validate post meta before saving is done
@@ -33,6 +35,14 @@ class EM_Event_Post_Admin{
 		if( empty($EM_Event) && !empty($post) && Archetypes::is_event($post) ){
 			$EM_Event = em_get_event($post->ID, 'post_id');
 		}
+	}
+
+	public static function admin_body_class($classes){
+		global $post;
+		if( !empty($post) && Archetypes::is_event($post) ){
+			$classes .= ' em-event-editor';
+		}
+		return $classes;
 	}
 
 	public static function admin_notices(){
@@ -298,7 +308,7 @@ class EM_Event_Post_Admin{
 			add_meta_box('em-event-anonymous', __('Anonymous Submitter Info','events-manager'), array('EM_Event_Post_Admin','meta_box_anonymous'), $screens, 'side','high');
 		}
 		add_meta_box('em-event-when', __('When','events-manager'), array('EM_Event_Post_Admin','meta_box_date'), $screens, 'side','high');
-		if ( em_get_option('dbem_recurrence_enabled') && ( !$EM_Event->event_id || $EM_Event->is_recurring() ) ) {
+		if ( em_get_option('dbem_recurrence_enabled') || ( !$EM_Event->event_id || $EM_Event->is_recurring() ) ) {
 			add_meta_box('em-event-recurring', __('Recurrences','events-manager'), array('EM_Event_Recurring_Post_Admin','meta_box_recurrence'), $screens, 'normal','high');
 		}
 		if(em_get_option('dbem_locations_enabled', true)){
