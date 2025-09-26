@@ -172,6 +172,9 @@ See our [FAQ](http://wp-events-plugin.com/documentation/faq/) page for helps wit
 18. Grid view for displaying your upcoming events at a glance
 
 == Changelog ==
+= 7.2.1 =
+* Fixed calendars not showing events due to timeslot update in 7.2
+
 = 7.2 =
 * MAJOR - Added multiple time range and dynamic timeslot support for single and recurring events
 * Event IDs can now be comprised of format `123:123` where the `:123` represents a timeslot ID
