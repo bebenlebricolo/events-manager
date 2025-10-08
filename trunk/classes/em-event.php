@@ -37,8 +37,7 @@ function em_get_event( $search_id = false, $search_by = 'event_id') {
 			if ( !empty( $found ) ) {
 				if ( !empty( $timeslot_id ) ) {
 					// convert to a timeslot if not already
-					$EM_Event = EM_Event::get_timeslot( $EM_Event, $timeslot_id );
-					return apply_filters( 'em_get_event', $EM_Event, $search_id, $search_by );
+					return apply_filters( 'em_get_event', EM_Event::get_timeslot( $EM_Event, $timeslot_id ), $search_id, $search_by );
 				} elseif ( !$EM_Event->timeslot_id ) {
 					// load only if current $EM_Event has no timeslot, we may have loaded the same event but in timeslot context
 					return apply_filters( 'em_get_event', $EM_Event, $search_id, $search_by );
@@ -783,6 +782,11 @@ class EM_Event extends EM_Object{
 							}
 						}
 					}
+				}
+			} else {
+				$this->event_archetype = Archetypes::get_from_cpt( $this->post_type );
+				if ( Archetypes::is_repeating( $this->post_type ) ) {
+					$this->event_type = 'repeating';
 				}
 			}
 			$this->get_status();
@@ -3688,8 +3692,9 @@ class EM_Event extends EM_Object{
 	 */
 	function get_recurrence_days(){
 		if ( $this->get_recurrence_sets()->length ) {
-			$this->get_recurrence_sets()->get_first()->get_recurrence_days();
+			return $this->get_recurrence_sets()->get_recurrence_days();
 		}
+		return [];
 	}
 
 	/**

@@ -320,7 +320,6 @@ function em_init_actions_start() {
 	$booking_actions = array_merge( $booking_ajax_actions, array_keys($booking_allowed_actions) );
 	if( !empty($_REQUEST['action']) && in_array($_REQUEST['action'], $booking_actions) && (is_user_logged_in() || (in_array($_REQUEST['action'], $booking_nopriv_actions) && em_get_option('dbem_bookings_anonymous'))) ){
 		global $EM_Event, $EM_Booking, $EM_Person;
-		Archetypes::set_current( $EM_Event->event_archetype );
 		//Load the booking object, with saved booking if requested
 		$EM_Booking = ( !empty($_REQUEST['booking_id']) ) ? em_get_booking($_REQUEST['booking_id']) : em_get_booking();
 		if( !empty($EM_Booking->event_id) ){
@@ -329,6 +328,9 @@ function em_init_actions_start() {
 		}elseif( !empty($_REQUEST['event_id']) ){
 			$EM_Event = em_get_event( $_REQUEST['event_id'] );
 		}
+		// set the archetype
+		Archetypes::set_current( $EM_Event->event_archetype );
+		// start process
 		$result = false;
 		$feedback = '';
 		do_action('em_before_booking_action_'.$_REQUEST['action'], $EM_Event, $EM_Booking);

@@ -4,20 +4,21 @@
 	/**
 	 * Timeranges Editor functionality
 	 */
-	function TimerangesEditor() {
-		this.init();
+	function TimerangesEditor( container ) {
+		this.init( container );
 	}
 
 	TimerangesEditor.prototype = {
-		init: function() {
-			this.bindEvents();
+		init: function( container = null ) {
+			this.bindEvents( container );
 		},
 
-		bindEvents: function() {
+		bindEvents: function( container = null ) {
+			let wrapper = container || document;
 			let self = this;
 
 			// Initialize preview if there are existing timeranges
-			document.querySelectorAll('.em-timeranges-editor').forEach( editor => {
+			wrapper.querySelectorAll('.em-timeranges-editor').forEach( editor => {
 				// Add timerange button
 				editor.addEventListener('click', function(e) {
 					if (e.target.matches('.em-timerange-add') || e.target.closest('.em-timerange-add')) {
@@ -537,6 +538,14 @@
 		},
 	};
 
-	document.addEventListener('em_event_editor_ready', () => { window.EM_TimerangesEditor = new TimerangesEditor() } );
+	document.addEventListener('em_event_editor_ready', () => {
+		window.EM_TimerangesEditor = new TimerangesEditor();
+	});
+	// add listener for ui setup
+	document.addEventListener('em_setup_ui_elements', function (e) {
+		if (e.detail.container !== document) {
+			window.EM_TimerangesEditor = new TimerangesEditor( e.detail.container );
+		}
+	});
 
 })();

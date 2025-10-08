@@ -260,7 +260,7 @@ namespace EM {
 			$settings = $this->get_current_context();
 			// set things like limit, cols, etc.
 			$this->cols = $settings['cols'] ?? $this->cols;
-			$this->limit = $settings['limit'] ?? $this->limit;
+			$this->limit = absint( $settings['limit'] ?? $this->limit ) ?: 10;
 			$this->filters = $settings['filters'] ?? $this->filters;
 			$this->orderby = $settings['orderby'] ?? $this->orderby;
 			// set default filters - child classes could set them here or after this parent constructor is called

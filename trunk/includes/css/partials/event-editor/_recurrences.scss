@@ -11,6 +11,12 @@ form.em-is-recurring {
 		display: none;
 		visibility: hidden;
 	}
+
+	// adding this to prevent some drawing issues experienced in Chrome (possibly others) in classic editor
+	.recurring-event-editor, .recurring-event-data, .postbox#em-event-recurring {
+		display: block;
+		visibility: visible;
+	}
 }
 
 form:not(.em-is-recurring) {

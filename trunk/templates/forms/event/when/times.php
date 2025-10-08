@@ -6,6 +6,7 @@ $name = "event_timeranges";
 $locked = false;
 $Timeranges = $EM_Event->get_timeranges();
 if ( $EM_Event->is_recurring( true ) ) {
+	// the recurring event itself is locked and has no time-ranges or slots, as it's handled in recurrence sets
 	$locked = true;
 	$Timeranges->allow_timeranges = false;
 	$Timeranges->get_first()->allow_timeslots = false;

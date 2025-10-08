@@ -245,6 +245,10 @@
   display: none;
   visibility: hidden;
 }
+.em form.em-is-recurring .recurring-event-editor, .em form.em-is-recurring .recurring-event-data, .em form.em-is-recurring .postbox#em-event-recurring {
+  display: block;
+  visibility: visible;
+}
 .em form:not(.em-is-recurring) .recurring-event-editor, .em form:not(.em-is-recurring) .recurring-event-data, .em form:not(.em-is-recurring) .postbox#em-event-recurring {
   display: none;
   visibility: hidden;

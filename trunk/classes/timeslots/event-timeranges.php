@@ -58,6 +58,9 @@ class Timeranges extends \EM\Timeranges {
 						}
 					}
 				}
+				if ( !$this->timeranges && $padding ) {
+					$this->timeranges[0] = new Timerange( [], $this->event );
+				}
 			} else {
 				// load timeranges for this group id
 				parent::load_timeranges(); // Load without padding, pad here if needed
@@ -132,9 +135,9 @@ class Timeranges extends \EM\Timeranges {
 	 * @return bool
 	 * @throws \Exception
 	 */
-	public function save( $event = null ) {
+	public function save( $event = null, $edit_action = null ) {
 		global $wpdb;
-		if ( $this->allow_edit ) {
+		if ( $this->allow_edit || $edit_action ) {
 			$Timeslots = $this->generate_timeslots();
 			$has_timeslots = count( $Timeslots ) > 1;
 			if ( !$event && $this->event->is_recurring( true ) && $has_timeslots) {
@@ -168,8 +171,8 @@ class Timeranges extends \EM\Timeranges {
 					}
 				} else {
 					$event = $this->event;
+					// save the timerange data to the database unless it's a recurrence (repeated too), recurrences inherit timerange information from the main event, repeated events will dynamically pull timerange info from the repeating event template
 					if ( !$event->is_recurrence( true ) ) {
-						// recurrences won't save themselves
 						parent::save();
 					}
 				}
@@ -187,11 +190,19 @@ class Timeranges extends \EM\Timeranges {
 					foreach ( $event_timeslots as $event_timeslot ) {
 						// find a matching Timeslot in the generated timeslots
 						$found_match = false;
-						foreach ( $Timeslots as $k => $Timeslot ) {
-							if ( $Timeslot->start->getDateTime('UTC') === $event_timeslot['timeslot_start'] && $Timeslot->end->getDateTime('UTC') === $event_timeslot['timeslot_end'] ) {
-								// do we have a match? If so, remove it from the Timeslot data as we don't need to take further action
+						foreach ( $Timeslots as $k => $Timeslot ) { /* @var Timeslot $Timeslot */
+							// do we have a match? If so, remove it from the Timeslot data as we don't need to take further action
+							if ( $Timeslot->start->getDateTime('UTC') === $event_timeslot['timeslot_start'] ) {
+								// matching dates found, at least, start time is the same and we can modify the end-time if necessary
 								$found_match = true;
+								// remove from the Timeslot array, we don't need to save it as a new one
 								unset( $Timeslots[ $k ] );
+								// update end times if necessary
+								if ( $Timeslot->end->getDateTime('UTC') !== $event_timeslot['timeslot_end'] ) {
+									// rather than delete or cancel the previous timeslot, we can just extend the end-time and let the admin decide whether to cancel bookings etc. so we avoid leaving cancelled events with conflicting times
+									$wpdb->update( EM_EVENT_TIMESLOTS_TABLE, [ 'timeslot_end' => $Timeslot->end->getDateTime('UTC') ], [ 'timeslot_id' => absint( $event_timeslot['timeslot_id'] ) ], '%s', '%d' );
+								}
+								// check if the timerange_id has changed, we don't need to delete/cancel the timeslot, just reassign the id of what it belongs to
 								if ( (int) $event_timeslot['timerange_id'] !== (int) $Timeslot->timerange_id ) {
 									$timerange_id = absint( $Timeslot->timerange_id );
 									if ( !isset( $events_timerange_id_updates[ $timerange_id ] ) ) {
@@ -201,10 +212,10 @@ class Timeranges extends \EM\Timeranges {
 								}
 								// add a status update mechanism too
 								if ( (int) $event_timeslot['timeslot_status'] !== (int) $Timeslot->timeslot_status ) {
-									if ( !isset( $events_timerange_id_updates[ $Timeslot->timeslot_status ] ) ) {
+									if ( !isset( $events_timeslot_status_updates[ $Timeslot->timeslot_status ] ) ) {
 										$events_timeslot_status_updates[ $Timeslot->timeslot_status ] = [];
 									}
-									$events_timerange_id_updates[ $Timeslot->timeslot_status ][] = absint( $event_timeslot['timeslot_id'] );
+									$events_timeslot_status_updates[ $Timeslot->timeslot_status ][] = absint( $event_timeslot['timeslot_id'] );
 								}
 								break;
 							}
@@ -216,7 +227,8 @@ class Timeranges extends \EM\Timeranges {
 					}
 					// Alter status of unmacehd event timeslots
 					if ( !empty( $events_timeslots_unmatched ) ) {
-						if ( $this->delete_action === 'delete' || !$this->event->get_option( 'dbem_event_status_enabled' ) ) {
+						$edit_action ??= $this->delete_action;
+						if ( $edit_action === 'delete' || !$this->event->get_option( 'dbem_event_status_enabled' ) ) {
 							$sql = 'DELETE FROM ' . EM_EVENT_TIMESLOTS_TABLE . ' WHERE timeslot_id IN (' . implode( ',', $events_timeslots_unmatched ) . ')';
 							$wpdb->query( $sql );
 						} else {

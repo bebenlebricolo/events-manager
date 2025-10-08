@@ -172,6 +172,23 @@ See our [FAQ](http://wp-events-plugin.com/documentation/faq/) page for helps wit
 18. Grid view for displaying your upcoming events at a glance
 
 == Changelog ==
+= 7.2.1.1 (dev) =
+* Fixed PHP notice in booking actions
+* Fixed critical PHP error in rare cases when booking table settings are saved incorrectly
+* Fixed timezone picker displaying default timezone after saving a single non-recurring event in event editor
+* Fixed fatal error when creating new repeating events due to missing default time range
+* Fixed recurring events not saving properly due to new time range selectors not being editable
+* Fixed redraw issue with showing a hidden recurrences meta box and marked recurrences meta box as required to display in screen options
+* Fixed JS error in time range picker when changing regular event to recurring
+* Forced recurrence meta box to appear in editor regardless of screen options
+* Fixed PHP error in some PHP versions due to accessing `$wp_filter` as an array
+* Fixed potential duplicate/multiple time range slots shown on new recurrence set creations
+* Fixed timeslot queries in `em_get_event()` overwriting the global `$EM_Event` object with timeslot event version
+* Fixed time range editor not allowing multiple time ranges when in a newly added recurrence set (before saving)
+* Fixed time range timeslot events not being correctly saved in repeating and recurring events
+* Fixed `EM_Event::get_recurrence_days()` not returning an array and causing fatal errors in some setups
+* Fixed recurrences not allowing "last of" monthly patterns which refer to "first"
+
 = 7.2.1 =
 * Fixed calendars not showing events due to timeslot update in 7.2
 

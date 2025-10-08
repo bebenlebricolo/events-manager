@@ -456,7 +456,7 @@ class Recurrence_Set extends EM_Object {
 	 */
 	public function get_timeranges() {
 		if ( empty( $this->timeranges ) ) {
-			$this->timeranges = new Timeranges( 'recurrence_set_' . $this->recurrence_set_id, $this->get_event() );
+			$this->timeranges = new Timeranges( $this->recurrence_set_id ? 'recurrence_set_' . $this->recurrence_set_id : null, $this->get_event() );
 			$this->timeranges->load_timeranges();
 			// change start/end times so they match recurrence set rather than event
 			if ( $this->recurrence_set_id ) {
@@ -663,6 +663,7 @@ class Recurrence_Set extends EM_Object {
 	public function get_post( $_DATA ) {
 		// Check rescheduling options
 		if ( $this->recurrence_set_id ) {
+			$this->reschedule_action = Recurrence_Sets::get_reschedule_action( $_DATA['reschedule']['action'] ?? null ); // excludes will likely hit a default, since they're global actions handled upstream
 			if ( !empty($_DATA['reschedule']['pattern']) ) {
 				$this->reschedule['pattern'] = (bool) wp_verify_nonce( $_DATA['reschedule']['pattern'], 'reschedule-pattern-'. $this->recurrence_set_id );
 			}
@@ -672,8 +673,8 @@ class Recurrence_Set extends EM_Object {
 			if ( !empty($_DATA['reschedule']['times']) ) {
 				$this->reschedule['times'] = (bool) wp_verify_nonce( $_DATA['reschedule']['times'], 'reschedule-times-'. $this->recurrence_set_id );
 				$this->get_timeranges()->allow_edit = $this->reschedule['times'];
+				$this->get_timeranges()->delete_action = $this->reschedule_action;
 			}
-			$this->reschedule_action = Recurrence_Sets::get_reschedule_action( $_DATA['reschedule']['action'] ?? null ); // excludes will likely hit a default, since they're global actions handled upstream
 		} else {
 			// we 'reschedule' i.e. create a new recurrence set
 			$this->reschedule['pattern'] = true;
@@ -712,7 +713,7 @@ class Recurrence_Set extends EM_Object {
 				} else if( $this->recurrence_freq == 'monthly' ){
 					// only new recurrence sets can save monthly byday, daily/yearly already dealt with by interval
 					$this->recurrence_byday = isset($_DATA['recurrence_byday']) ? absint($_DATA['recurrence_byday']) : null;
-					$this->recurrence_byweekno = !empty($_DATA['recurrence_byweekno']) ? absint($_DATA['recurrence_byweekno']) : null;
+					$this->recurrence_byweekno = !empty($_DATA['recurrence_byweekno']) ? (int) $_DATA['recurrence_byweekno'] : null;
 				}
 			}
 		}
@@ -1075,10 +1076,10 @@ class Recurrence_Set extends EM_Object {
 										) );
 									}
 								}
-								// save timeslots if there are any, switch the timerange object event_id
-								if ( $EM_Event->has_timeslots() ) {
-									// Clone timeranges for saving further on (maybe)
-									$EM_Event->get_timeranges()->save( $event );
+								// save timeslots if there are any, switch the timerange object event_id by supplying the $event context
+								if ( $this->get_timeranges()->has_timeslots() ) {
+									// copy delete and edit permissions from this
+									$this->get_timeranges()->save( $event, $this->reschedule_action );
 								}
 							}
 							//insert the metas in one go, faster than one by one
@@ -1174,7 +1175,6 @@ class Recurrence_Set extends EM_Object {
 				'scope' => 'all',
 				'status' => 'everything',
 				'array' => true,
-				'timeslots' => $this->get_event()->has_timeslots(),
 			] );
 
 			// Only process if we have existing events

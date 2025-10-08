@@ -10,9 +10,11 @@ document.addEventListener('em_event_editor_recurrences', function( e ) {
 
 		recurrenceSets.dispatchEvent( new CustomEvent('setAdvancedDefaults') );
 
+		let eventType = recurrenceSets.closest('form').querySelector('input[name="event_type"]')?.value;
+
 		// Add change handlers for selectize dropdowns in first recurrence set
-		// track selectize changes
-		if ( container === document ) {
+		// track selectize changes assuming recurrences are enabled
+		if ( container === document && ( eventType === 'recurring' || eventType === 'repeating' ) ) {
 			// Get the first recurrence set
 			let firstRecurrenceSet = recurrenceSets.querySelector('.em-recurrence-type-include .em-recurrence-set:first-child');
 

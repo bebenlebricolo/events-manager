@@ -15,6 +15,9 @@ document.addEventListener('em_event_editor_ready', function() {
 		});
 	});
 
+	// disable recurrence meta box selection since we must always show it
+	document.getElementById('em-event-recurring-hide')?.setAttribute('disabled', '');
+
 	// Handle the recurring/repeating event selection and initialize showing/hiding relevant recurring sections
 	document.querySelectorAll( '.event_type' ).forEach( eventType => {
 		const form = eventType.closest( 'form' );
@@ -32,7 +35,7 @@ document.addEventListener('em_event_editor_ready', function() {
 				} else {
 					selectedDates = eventDatePicker.querySelector('.em-date-input.flatpickr-input')._flatpickr.selectedDates;
 				}
-				let eventTimeRange = eventDateTimes.querySelector('.event-times.em-time-range');
+				let eventTimeRange = eventDateTimes.querySelector('.em-time-range');
 				// we need to get jQuery elements to handle the timepicker
 				let eventStartTime = eventTimeRange.querySelector('.em-time-input.em-time-start');
 				let eventEndTime = eventTimeRange.querySelector('.em-time-input.em-time-end');

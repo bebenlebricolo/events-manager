@@ -4,20 +4,21 @@
 	/**
 	 * Timeranges Editor functionality
 	 */
-	function TimerangesEditor() {
-		this.init();
+	function TimerangesEditor( container ) {
+		this.init( container );
 	}
 
 	TimerangesEditor.prototype = {
-		init: function() {
-			this.bindEvents();
+		init: function( container = null ) {
+			this.bindEvents( container );
 		},
 
-		bindEvents: function() {
+		bindEvents: function( container = null ) {
+			let wrapper = container || document;
 			let self = this;
 
 			// Initialize preview if there are existing timeranges
-			document.querySelectorAll('.em-timeranges-editor').forEach( editor => {
+			wrapper.querySelectorAll('.em-timeranges-editor').forEach( editor => {
 				// Add timerange button
 				editor.addEventListener('click', function(e) {
 					if (e.target.matches('.em-timerange-add') || e.target.closest('.em-timerange-add')) {
@@ -537,7 +538,15 @@
 		},
 	};
 
-	document.addEventListener('em_event_editor_ready', () => { window.EM_TimerangesEditor = new TimerangesEditor() } );
+	document.addEventListener('em_event_editor_ready', () => {
+		window.EM_TimerangesEditor = new TimerangesEditor();
+	});
+	// add listener for ui setup
+	document.addEventListener('em_setup_ui_elements', function (e) {
+		if (e.detail.container !== document) {
+			window.EM_TimerangesEditor = new TimerangesEditor( e.detail.container );
+		}
+	});
 
 })();
 
@@ -558,6 +567,9 @@ document.addEventListener('em_event_editor_ready', function() {
 		});
 	});
 
+	// disable recurrence meta box selection since we must always show it
+	document.getElementById('em-event-recurring-hide')?.setAttribute('disabled', '');
+
 	// Handle the recurring/repeating event selection and initialize showing/hiding relevant recurring sections
 	document.querySelectorAll( '.event_type' ).forEach( eventType => {
 		const form = eventType.closest( 'form' );
@@ -575,7 +587,7 @@ document.addEventListener('em_event_editor_ready', function() {
 				} else {
 					selectedDates = eventDatePicker.querySelector('.em-date-input.flatpickr-input')._flatpickr.selectedDates;
 				}
-				let eventTimeRange = eventDateTimes.querySelector('.event-times.em-time-range');
+				let eventTimeRange = eventDateTimes.querySelector('.em-time-range');
 				// we need to get jQuery elements to handle the timepicker
 				let eventStartTime = eventTimeRange.querySelector('.em-time-input.em-time-start');
 				let eventEndTime = eventTimeRange.querySelector('.em-time-input.em-time-end');
@@ -1937,9 +1949,11 @@ document.addEventListener('em_event_editor_recurrences', function( e ) {
 
 		recurrenceSets.dispatchEvent( new CustomEvent('setAdvancedDefaults') );
 
+		let eventType = recurrenceSets.closest('form').querySelector('input[name="event_type"]')?.value;
+
 		// Add change handlers for selectize dropdowns in first recurrence set
-		// track selectize changes
-		if ( container === document ) {
+		// track selectize changes assuming recurrences are enabled
+		if ( container === document && ( eventType === 'recurring' || eventType === 'repeating' ) ) {
 			// Get the first recurrence set
 			let firstRecurrenceSet = recurrenceSets.querySelector('.em-recurrence-type-include .em-recurrence-set:first-child');
 

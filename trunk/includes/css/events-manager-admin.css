@@ -770,6 +770,10 @@
   display: none;
   visibility: hidden;
 }
+.wp-admin form.em-is-recurring .recurring-event-editor, .wp-admin form.em-is-recurring .recurring-event-data, .wp-admin form.em-is-recurring .postbox#em-event-recurring {
+  display: block;
+  visibility: visible;
+}
 .wp-admin form:not(.em-is-recurring) .recurring-event-editor, .wp-admin form:not(.em-is-recurring) .recurring-event-data, .wp-admin form:not(.em-is-recurring) .postbox#em-event-recurring {
   display: none;
   visibility: hidden;
