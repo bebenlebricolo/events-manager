@@ -8,13 +8,19 @@ use EM_DateTime;
  * @property EM_DateTime $end
  */
 class Timeslot extends \EM_Object {
-
+	/**
+	 * @var int
+	 */
 	public $timerange_id;
 	/**
 	 * Start time of timeslot,
 	 * @var EM_DateTime
 	 */
 	public $start;
+	/**
+	 * End time of timeslot,
+	 * @var EM_DateTime
+	 */
 	public $end;
 
 	/**
@@ -32,10 +38,7 @@ class Timeslot extends \EM_Object {
 	 *
 	 * $timerange_id is optional and can be used to link timeslots to a specific timerange.
 	 *
-	 * @param $start
-	 * @param $end
-	 * @param $timerange_id
-	 * @param $timezone
+	 * @param array $args
 	 */
 	public function __construct( $args ) {
 		$start = $args['start'] ?? $args['timeslot_start'];

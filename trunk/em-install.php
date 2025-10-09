@@ -1145,10 +1145,13 @@ function em_upgrade_current_installation(){
 		$data['admin-modals']['review-nudge'] = time() + (DAY_IN_SECONDS * 14);
 		update_site_option('dbem_data', $data);
 	}
-	// temp promo
-	if( time() < 1751659200 && ( version_compare($current_version, '7.0.4', '<') || !empty($data['admin-modals']['review-nudge']) )  ) {
-		$EM_Admin_Notice = new EM_Admin_Notice(array( 'name' => 'promo-popup', 'who' => 'admin', 'where' => 'all', 'raw_output' => true ));
-		EM_Admin_Notices::add($EM_Admin_Notice, is_multisite());
+	// promo - lt
+	if( ( version_compare($current_version, '7.2.2', '<') || !empty($data['admin-modals']['review-nudge']) )  ) {
+		//$EM_Admin_Notice = new EM_Admin_Notice(array( 'name' => 'promo-popup', 'who' => 'admin', 'where' => 'all', 'raw_output' => true ));
+		//EM_Admin_Notices::add($EM_Admin_Notice, is_multisite());
+		if(  empty($data['admin-modals'])  )  $data['admin-modals']  =  array();
+		$data['admin-modals']['promo-popup']  =  true;
+		update_site_option('dbem_data',  $data);
 	}
 	
 	// Check EM Pro update min

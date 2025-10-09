@@ -1249,10 +1249,10 @@ class EM_Event extends EM_Object{
 	 * Will automatically detect whether it's a new or existing event. 
 	 * @return boolean
 	 */
-	function save(){
+	function save() {
 		global $wpdb, $current_user, $blog_id, $EM_SAVING_EVENT;
 		$EM_SAVING_EVENT = true; //this flag prevents our dashboard save_post hooks from going further
-		if ( $this->is_recurrence() ) {
+		if ( $this->is_recurrence() && !$this->duplicating_event ) {
 			// not repeated event, but a recurrence of a recurring event - no post saving done here
 			$result = true;
 		} else {
@@ -1547,8 +1547,8 @@ class EM_Event extends EM_Object{
 					    }
 					}
 				}
-			} else if ( !empty($this->timeslots ) && $this->get_option('dbem_timeslots_enabled', true) && $this->is_published() ) {
-				// save the timeslots for this event
+			} else if ( !empty($this->timeslots ) && $this->get_option('dbem_timeslots_enabled', true) ) {
+				// save the timeslots for this event, it's OK if records are created because they won't show up if master event is not published
 				$this->get_timeranges()->save();
 			}
 			if( !empty($this->just_added_event) ){
@@ -1600,6 +1600,21 @@ class EM_Event extends EM_Object{
 					$Recurrence_Set->recurrence_set_id = null;
 				}
 			}
+			// go through timeranges, clone data, remove timerange/group ids and enable editing for saving
+			$EM_Event->timeslots = clone $this->get_timeranges();
+			foreach ( $EM_Event->get_timeranges() as $Timerange ) {
+				foreach ( $Timerange->get_timeslots() as $Timeslot ) {
+					$Timeslot->timerange_id = null;
+					$Timeslot->event = $EM_Event;
+				}
+				// do this after so we get the timeslot data first
+				$EM_Event->timeslots->set_group_id( null );
+				$Timerange->timerange_id = null;
+			}
+			$EM_Event->timeslots->allow_edit = true;
+			$EM_Event->timeslots->event = $EM_Event;
+			// now save the event and follow through
+			$EM_Event->duplicating_event = true; // set special flag so we don't have problems with recurrences not saving as a new event
 			if( $EM_Event->save() ){
 				$EM_Event->feedback_message = sprintf(__("%s successfully duplicated.", 'events-manager'), __('Event','events-manager'));
 				//save tags here - eventually will be moved into part of $this->save();
@@ -1698,12 +1713,13 @@ class EM_Event extends EM_Object{
 			if( $result !== false ){
 				$this->get_bookings()->delete();
 				$this->get_tickets()->delete();
+				$this->get_timeranges()->delete();
 				if( $this->has_event_location() ) {
 					$this->get_event_location()->delete();
 				}
 				//Delete the recurrences then this recurrence event
 				if( $this->is_recurring( true ) ){
-					$result = $this->get_recurrence_sets()->delete_events(); //was true at this point, so false if fails
+					$result = $this->get_recurrence_sets()->delete(); //was true at this point, so false if fails
 				}
 				//Delete categories from meta if in MS global mode
 				if( EM_MS_GLOBAL ){

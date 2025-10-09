@@ -5,7 +5,7 @@ Tags: events, calendar, tickets, bookings, appointments
 Text Domain: events-manager
 Requires at least: 6.1
 Tested up to: 6.8
-Stable tag: 7.2.1
+Stable tag: 7.2.2
 Requires PHP: 7.0
 License: GPLv2
 
@@ -172,7 +172,7 @@ See our [FAQ](http://wp-events-plugin.com/documentation/faq/) page for helps wit
 18. Grid view for displaying your upcoming events at a glance
 
 == Changelog ==
-= 7.2.1.1 (dev) =
+= 7.2.2 =
 * Fixed PHP notice in booking actions
 * Fixed critical PHP error in rare cases when booking table settings are saved incorrectly
 * Fixed timezone picker displaying default timezone after saving a single non-recurring event in event editor
@@ -188,6 +188,14 @@ See our [FAQ](http://wp-events-plugin.com/documentation/faq/) page for helps wit
 * Fixed time range timeslot events not being correctly saved in repeating and recurring events
 * Fixed `EM_Event::get_recurrence_days()` not returning an array and causing fatal errors in some setups
 * Fixed recurrences not allowing "last of" monthly patterns which refer to "first"
+* Fixed recurring or repeating events not properly saving initial timerange sets
+* Added `set_status()` methods to Timeranges, Timerange, and Timeslot objects
+* Fixed recurrence sets not saving event status to timeslots
+* Optimized `has_timeslot()` checks to avoid regenerating timeslot objects early before saving
+* Fixed timeslots saving without `timerange_id`
+* Fixed timeslots not getting deleted with an event
+* Fixed duplication or saving issues when event is a draft resulting in unsaved timerange data
+* Fixed duplicating single recurrences not working
 
 = 7.2.1 =
 * Fixed calendars not showing events due to timeslot update in 7.2

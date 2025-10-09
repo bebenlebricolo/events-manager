@@ -60,6 +60,21 @@ class Recurrence_Sets extends \EM_Object implements \Iterator, \ArrayAccess, \Co
 	 * @var string
 	 */
 	public $reschedule_exclude;
+	/**
+	 * Returns a multi-dimensional array of recurrences, indexed by UTC start date then start_time, which can be used for collision detection.
+	 *
+	 * Within a start time record, it can be an array containg an event array, or an array of events in case there are multiple events on the same time.
+	 *
+	 * @return array
+	 */
+	/**
+	 * @var bool Flag to track if recurrences have been modified and need resorting
+	 */
+	public $recurrences_modified = true;
+	/**
+	 * @var int Last count of recurrences array, used to detect modifications
+	 */
+	protected $recurrences_count = 0;
 
 	// Booking flags - detect when to modify bookings in recurrences
 
@@ -131,23 +146,6 @@ class Recurrence_Sets extends \EM_Object implements \Iterator, \ArrayAccess, \Co
 			$this->default = $Recurrence_Set;
 		}
 	}
-
-
-	/**
-	 * Returns a multi-dimensional array of recurrences, indexed by UTC start date then start_time, which can be used for collision detection.
-	 *
-	 * Within a start time record, it can be an array containg an event array, or an array of events in case there are multiple events on the same time.
-	 *
-	 * @return array
-	 */
-	/**
-	 * @var bool Flag to track if recurrences have been modified and need resorting
-	 */
-	public $recurrences_modified = true;
-	/**
-	 * @var int Last count of recurrences array, used to detect modifications
-	 */
-	protected $recurrences_count = 0;
 
 	/**
 	 * Returns a multi-dimensional array of recurrences, indexed by UTC start date then start_time, which can be used for collision detection.
@@ -604,6 +602,20 @@ class Recurrence_Sets extends \EM_Object implements \Iterator, \ArrayAccess, \Co
 		}
 		// return final result
 		return apply_filters( 'em_recurrence_sets_save_recurrences', $result, $this );
+	}
+
+	/**
+	 * Deletes recurrences, bookings and anything associated with this set
+	 * @return boolean
+	 */
+	public function delete() {
+		foreach ( $this->include as $Recurrence_Set ) {
+			$results[] = $Recurrence_Set->delete();
+		}
+		foreach( $this->exclude as $Recurrence_Set ) {
+			$results[] = $Recurrence_Set->delete();
+		}
+		return !in_array( false, $results ?? [] );
 	}
 
 	/**

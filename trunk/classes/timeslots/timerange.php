@@ -338,8 +338,8 @@ class Timerange extends EM_Object {
 	 */
 
 	/**
-	 * Generates an array of timeranges based on current timerange rules.
-	 * @return string[]
+	 * Generates an array of Timeslot objects based on current timerange rules.
+	 * @return Timeslot[]
 	 */
 	public function get_timeslots() {
 		if ( $this->has_timeslot_rules()  ) {
@@ -351,7 +351,10 @@ class Timerange extends EM_Object {
 	}
 
 	public function has_timeslots() {
-		return count( $this->get_timeslots() ) > 1;
+		if ( $this->has_timeslot_rules()  ) {
+			$timeslots = $this->generate_timeslots_data();
+		}
+		return count( $timeslots ?? [] ) > 1;
 	}
 
 	public function has_timeslot_rules() {
@@ -361,9 +364,22 @@ class Timerange extends EM_Object {
 	/**
 	 * Generates sequential slot start times within this timerange window as integer seconds since midnight.
 	 *
-	 * @return array Array of timerange start/end times (minutes since midnight)
+	 * @return Timeslot[]
 	 */
 	public function generate_timeslots() {
+		$timeslots = $this->generate_timeslots_data();
+		$slots = [];
+		foreach ( $timeslots as $slot ) {
+			$slots[] = $this->get_timeslot( $slot );
+		}
+		return $slots;
+	}
+
+	/**
+	 * Genearates array of timeslots in array format for use to create Timeslot objects, or for counting/previewing.
+	 * @return array
+	 */
+	public function generate_timeslots_data() {
 		$startMinutes = $this->timeTimestamp($this->timerange_start);
 		$endMinutes = $this->timeTimestamp($this->timerange_end);
 
@@ -377,19 +393,17 @@ class Timerange extends EM_Object {
 			$currentStart = $startMinutes;
 
 			if ($currentStart == $endMinutes) {
-				$slot = [ 'start' => $currentStart, 'end' => $currentStart, 'timerange_id' => $this->timerange_id, ];
-				$slots[] = $this->get_timeslot( $slot );
+				$slots[] = [ 'start' => $currentStart, 'end' => $currentStart, 'timerange_id' => $this->timerange_id, ];
 			} else {
 				$interval = $frequency > 0 ? $frequency : ($duration > 0 ? ($duration + $buffer) : 0);
 				if ($interval <= 0) $interval = $endMinutes; // prevent infinite loop
 
 				for ($i = 0; $currentStart < $endMinutes; $i++) {
-					$slot = [
+					$slots[] = [
 						'start' => $currentStart,
 						'end' => $duration > 0 ? $currentStart + $duration : $endMinutes,
 						'timerange_id' => $this->timerange_id,
 					];
-					$slots[] = $this->get_timeslot( $slot );
 					$currentStart += $interval;
 				}
 			}

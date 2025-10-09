@@ -15,6 +15,7 @@ class Timeranges extends \EM\Timeranges {
 	 */
 	public $event;
 	public $timeslots = [];
+	public $status = 1;
 
 	/**
 	 * Constructor to initialize the Event Timeslots collection.
@@ -112,8 +113,7 @@ class Timeranges extends \EM\Timeranges {
 		if ( $this->event->event_type === 'timeslot' ) {
 			return false;
 		}
-		$this->load_timeslots();
-		return count($this->timeslots) > 1;
+		return parent::has_timeslots();
 	}
 
 	public function get() {
@@ -130,7 +130,7 @@ class Timeranges extends \EM\Timeranges {
 
 	/**
 	 * Saves event timeslots to the database, if an event array is supplied as context, the timeranges are not saved and just timeslots are saved, which is useful for saving recurrences or repetitions.
-	 * @param $event
+	 * @param $event If supplied, it is assumed that the timeranges has been saved
 	 *
 	 * @return bool
 	 * @throws \Exception
@@ -138,23 +138,26 @@ class Timeranges extends \EM\Timeranges {
 	public function save( $event = null, $edit_action = null ) {
 		global $wpdb;
 		if ( $this->allow_edit || $edit_action ) {
-			$Timeslots = $this->generate_timeslots();
-			$has_timeslots = count( $Timeslots ) > 1;
+			$has_timeslots = $this->has_timeslots();
+			$event_active_status = 1;
 			if ( !$event && $this->event->is_recurring( true ) && $has_timeslots) {
 				// just save the timeranges, recurring and repeating doesn't have timeslots themselves, only the recurrences
 				parent::save();
 			} elseif ( $has_timeslots ){
-				// we have more than one timerange or Timeslot here, so we save them as event timeslots alongside the timeranges, otherwise we just let the start/end times be saved to the event db table
+				// we have more than one timerange or Timeslot here,
 				// save group id to timeranges, in case it's a new event
 				$this->group_id = 'event_' . $this->event->event_id;
 				foreach ( $this->timeranges as $Timerange ) {
 					$Timerange->group_id = $this->group_id;
 				}
-				// get the event details, either supplied argument (e.g. for repeating/recurring events saving recurrences) or the context event
+				// get the event details we'll use further on, either supplied argument (e.g. for repeating/recurring events saving recurrences) or the context event
 				if ( $event ) {
+					// it is assumed that the current timeranges have been saved with valid timerange_id values, so we generate new timeslots
+					$Timeslots = $this->generate_timeslots( true );
 					if ( is_array( $event ) ) {
+						// we're essentially saving a duplicate template of timeranges/timeslots for a different event context, such as for a recurrence/repeated
 						$event_id = absint( $event['event_id'] );
-						$event_status = absint( $event['event_status'] );
+						$event_active_status = absint( $event['event_active_status'] );
 						// if a different start/end date is supplied, clone the timeslots and change the dates for this time around
 						if ( !empty( $event['event_start'] ) && !empty( $event['event_end'] ) ) {
 							// create a clone of the timeslots objects and change the date of new cloned object
@@ -171,14 +174,17 @@ class Timeranges extends \EM\Timeranges {
 					}
 				} else {
 					$event = $this->event;
+					$event_active_status = $event->event_active_status;
 					// save the timerange data to the database unless it's a recurrence (repeated too), recurrences inherit timerange information from the main event, repeated events will dynamically pull timerange info from the repeating event template
 					if ( !$event->is_recurrence( true ) ) {
 						parent::save();
 					}
+					// generate timeslots after saving so we have valid timerange_id values
+					$Timeslots = $this->generate_timeslots( true);
 				}
 				if ( $event instanceof EM_Event ) {
 					$event_id = $event->event_id;
-					$event_status = $event->event_status;
+					$event_active_status = $event->event_active_status;
 				}
 				// build the array of timeslots we will save, based on the start/end dates of the event
 				if ( !empty( $event_id ) ) {
@@ -211,11 +217,11 @@ class Timeranges extends \EM\Timeranges {
 									$events_timerange_id_updates[ $timerange_id ][] = absint( $event_timeslot['timeslot_id'] );
 								}
 								// add a status update mechanism too
-								if ( (int) $event_timeslot['timeslot_status'] !== (int) $Timeslot->timeslot_status ) {
-									if ( !isset( $events_timeslot_status_updates[ $Timeslot->timeslot_status ] ) ) {
-										$events_timeslot_status_updates[ $Timeslot->timeslot_status ] = [];
+								if ( (int) $event_timeslot['timeslot_status'] !== (int) $event_active_status ) {
+									if ( !isset( $events_timerange_status_updates ) ) {
+										$events_timerange_status_updates = [];
 									}
-									$events_timeslot_status_updates[ $Timeslot->timeslot_status ][] = absint( $event_timeslot['timeslot_id'] );
+									$events_timerange_status_updates[] = absint( $Timeslot->timerange_id );
 								}
 								break;
 							}
@@ -251,11 +257,9 @@ class Timeranges extends \EM\Timeranges {
 						}
 					}
 					// update timeslot statuses for timeslots that have changed, since we don't need to delete the Timeslot itself
-					if ( !empty( $events_timeslot_status_updates ) ) {
-						foreach ( $events_timeslot_status_updates as $timeslot_status => $timeslot_ids ) {
-							$sql = "UPDATE " . EM_EVENT_TIMESLOTS_TABLE . " SET timeslot_status = ". absint($timeslot_status) ." WHERE timeslot_id IN (" . implode( ',', $timeslot_ids ) . ")";
-							$wpdb->query( $sql );
-						}
+					if ( !empty( $events_timerange_status_updates ) ) {
+						$sql = "UPDATE " . EM_EVENT_TIMESLOTS_TABLE . " SET timeslot_status = ". (int) $event_active_status ." WHERE timerange_id IN (" . implode( ',', $events_timerange_status_updates ) . ")";
+						$wpdb->query( $sql );
 					}
 					// add new timeslots
 					if ( $Timeslots ) {
@@ -263,7 +267,7 @@ class Timeranges extends \EM\Timeranges {
 						$sql = "INSERT INTO " . EM_EVENT_TIMESLOTS_TABLE . " (event_id, timeslot_start, timeslot_end, timerange_id, timeslot_status) VALUES ";
 						$sqls = [];
 						foreach ( $Timeslots as $Timeslot ) {
-							$sqls[] = $wpdb->prepare( "(%d, %s, %s, %d, %d)", $event_id, $Timeslot->start->getDateTime('UTC'), $Timeslot->end->getDateTime('UTC'), $Timeslot->timerange_id, $event_status );
+							$sqls[] = $wpdb->prepare( "(%d, %s, %s, %d, %d)", $event_id, $Timeslot->start->getDateTime('UTC'), $Timeslot->end->getDateTime('UTC'), $Timeslot->timerange_id, $event_active_status );
 						}
 						$sql .= implode( ', ', $sqls );
 						if ( $wpdb->query( $sql ) === false ) {
@@ -273,11 +277,33 @@ class Timeranges extends \EM\Timeranges {
 				}
 				return apply_filters( 'em_event_timeslots_save', !$this->errors, $this );
 			} else {
-				// remove all timerange entries from the DB, we only need the one in the event table
+				// remove all timerange entries from the DB, we only need the one in the event table which can generate a simple timerange without advanced rules dynamically
 				$wpdb->query( "DELETE FROM " . EM_TIMERANGES_TABLE . " WHERE timerange_group_id='event_" . $this->event->event_id . "'" );
 				$wpdb->query( "DELETE FROM " . EM_EVENT_TIMESLOTS_TABLE . " WHERE event_id=" . absint( $this->event->event_id ) );
 			}
 		}
+	}
+
+	public function set_status( $status, $db = true ) {
+		global $wpdb;
+		// we can just set status in one SQL status where all timerange ids are included
+		$this->status = (int) $status;
+		foreach ( $this->timeranges as $Timerange ) {
+			if ( $Timerange->timerange_id ) {
+				$timerange_ids[] = absint($Timerange->timerange_id);
+			}
+			$Timerange->status = $this->status;
+			foreach ( $Timerange->timeslots as $Timeslot ) {
+				$Timeslot->timeslot_status = $this->status;
+			}
+		}
+		if ( $db ) {
+			if ( !empty( $timerange_ids ) ) {
+				$sql = "UPDATE " . EM_EVENT_TIMESLOTS_TABLE . " SET timeslot_status = " . $this->status . " WHERE timerange_id IN (" . implode( ',', $timerange_ids ) . ")";
+				$wpdb->query( $sql );
+			}
+		}
+		return $this;
 	}
 }
 include( __DIR__ . '/event-timerange.php');

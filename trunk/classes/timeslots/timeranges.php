@@ -55,6 +55,19 @@ class Timeranges extends \EM_Object implements \Iterator, \ArrayAccess, \Countab
 	}
 
 	/**
+	 * Sets the group id of this set and recursively sets each group id in the timeranges
+	 * @param $group_id
+	 *
+	 * @return void
+	 */
+	public function set_group_id( $group_id ) {
+		$this->group_id = $group_id;
+		foreach ( $this->timeranges as $Timerange ) {
+			$Timerange->timerange_group_id = $group_id;
+		}
+	}
+
+	/**
 	 * @param $data
 	 *
 	 * @return Timerange
@@ -99,10 +112,11 @@ class Timeranges extends \EM_Object implements \Iterator, \ArrayAccess, \Countab
 
 	/**
 	 * Generates an array of timeslots, in minutes since midnight for a day based on timerange rules in this set.
+	 * @param $reload
 	 * @return Timeslot[]
 	 */
-	public function generate_timeslots() {
-		if ( !$this->generated_timeslots ) {
+	public function generate_timeslots( $reload = false ) {
+		if ( !$this->generated_timeslots || $reload ) {
 			$this->generated_timeslots = [];
 			foreach ( $this->get_timeranges() as $timerange ) {
 				$this->generated_timeslots = array_merge( $this->generated_timeslots, $timerange->generate_timeslots() );

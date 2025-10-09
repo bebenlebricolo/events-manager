@@ -73,6 +73,21 @@ class Timeslot extends \EM\Timeslot {
 		$this->end = clone $this->end;
 	}
 
+	/**
+	 * Sets status property and all timeslots in this timerange to the same status. Makes a single SQL call to update all event timeslots belonging to this timerange.
+	 * @param $status
+	 *
+	 * @return void
+	 */
+	public function set_status( $status, $db = true ) {
+		$this->timeslot_status = (int) $status;
+		if ( $db ) {
+			global $wpdb;
+			$sql = "UPDATE " . EM_EVENT_TIMESLOTS_TABLE . " SET timeslot_status = " . $this->timeslot_status . " WHERE timeslot_id = " . absint( $this->timeslot_id );
+			$wpdb->query( $sql );
+		}
+	}
+
 	public function get_uid() {
 		return absint($this->event->event_id) . ':' . absint($this->timeslot_id);
 	}

@@ -15,6 +15,7 @@ class Timerange extends \EM\Timerange {
 	protected $event;
 	protected $event_id;
 	public $timeslots = [];
+	public $status = 1;
 
 	public function __construct( $data = false, $EM_Event = null ) {
 		parent::__construct($data);
@@ -64,6 +65,9 @@ class Timerange extends \EM\Timerange {
 	}
 
 	public function get_timeslot( $data ) {
+		if ( empty( $data['timeslot_status'] ) ) {
+			$data['timeslot_status'] = $this->status;
+		}
 		return new Timeslot( $data, $this->event );
 	}
 
@@ -74,5 +78,35 @@ class Timerange extends \EM\Timerange {
 	public function get_timeslots() {
 		$this->load_timeslots();
 		return $this->timeslots;
+	}
+
+	/**
+	 * Sets status property and all timeslots in this timerange to the same status. Makes a single SQL call to update all event timeslots belonging to this timerange.
+	 * @param $status
+	 *
+	 * @return void
+	 */
+	public function set_status( $status, $db = true ) {
+		$this->status = (int) $status;
+		foreach ( $this->timeslots as $Timeslot ) {
+			$Timeslot->timeslot_status = $this->status;
+		}
+		if ( $db ) {
+			global $wpdb;
+			$sql = "UPDATE " . EM_EVENT_TIMESLOTS_TABLE . " SET timeslot_status = " . $this->status . " WHERE timerange_id = " . absint( $this->timerange_id );
+			$wpdb->query( $sql );
+		}
+	}
+
+	/**
+	 * Deletes the timerange and all timeslots belonging to it.
+	 * @return bool
+	 */
+	public function delete() {
+		global $wpdb;
+		$result = parent::delete();
+		// now delete timeslots too
+		$timeslots_result = $wpdb->delete( EM_EVENT_TIMESLOTS_TABLE, [ 'timerange_id' => $this->timerange_id ] );
+		return apply_filters( 'em_event_timerange_delete', $result && $timeslots_result !== false, $this );
 	}
 }
