@@ -82,7 +82,7 @@ class EM_Admin_Modals {
 				$has_lifetime_already = $key && date('Y', $key['until'] ?? time() ) === '2125';
 			}
 			if( !empty($data['admin-modals']['promo-popup']) && empty($has_lifetime_already) ) {
-				if( $data['admin-modals']['promo-popup'] == 1 || ($data['admin-modals']['promo-popup'] == 2 && ($show_plugin_pages || $show_network_admin) ) ) {
+				if( $data['admin-modals']['promo-popup'] && ($show_plugin_pages || $show_network_admin) ) {
 					// enqueue script and load popup action
 					if( empty($data['admin-modals']['promo-popup-count']) ){
 						$data['admin-modals']['promo-popup-count'] = 0;
