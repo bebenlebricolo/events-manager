@@ -19,7 +19,7 @@ class EM_Admin_Modals {
 		// show modal
 		$data = is_multisite() ? get_site_option('dbem_data') : em_get_option('dbem_data');
 		if( !empty($data['admin-modals']) ){
-			$show_plugin_pages = !empty($_REQUEST['post_type']) && in_array($_REQUEST['post_type'], array(EM_POST_TYPE_EVENT, EM_POST_TYPE_LOCATION, 'event-recurring'));
+			$show_plugin_pages = !empty($_REQUEST['post_type']) && \EM\Archetypes::is_valid_cpt( $_REQUEST['post_type'] );
 			$show_network_admin = is_network_admin() && !empty($_REQUEST['page']) && preg_match('/^events\-manager\-/', $_REQUEST['page']);
 			// show review nudge
 			if( !empty($data['admin-modals']['review-nudge']) && $data['admin-modals']['review-nudge'] < time() ) {
@@ -333,8 +333,8 @@ class EM_Admin_Modals {
 	
 	public static function promo_notice(){
 		$key = em_get_option('dbem_pro_api_key');
-		if ( $key && date('Y', $key['until'] ?? time() ) !== '2125' ) {
-			ob_start();
+		ob_start();
+		if ( empty($key) || date('Y', $key['until'] ?? time() ) !== '2125' ) {
 			?>
 			<div style="display: grid; grid-template-columns: 80px auto; grid-gap: 20px; margin: 15px 0;">
 				<div style="text-align: center;  align-self: start; padding-left: 10px; padding-top:10px;">
