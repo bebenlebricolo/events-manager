@@ -13,7 +13,7 @@ Fully featured events calendar, booking registration, appointments, recurring ev
 
 == Description ==
 
-Events Manager is a full-featured event calendar, bookings, appointments and registration management plugin for WordPress based on the principles of flexibility, reliability and powerful features!
+Events Manager is a full-featured event calendar, bookings, appointments, scheduling, and registration management plugin for WordPress ideal for everything from simple meetups to full-scale event planning. Built with flexibility, reliability and powerful features in mind.
 
 * [Demo](https://eventsmanager.site)
 * [Documentation](http://wp-events-plugin.com/documentation/)
@@ -147,6 +147,16 @@ Please [read these instructions](http://wp-events-plugin.com/updating-to-v5/).
 For those upgrading from version 4 to 5, please [read these instructions](http://wp-events-plugin.com/updating-to-v5/).
 
 == Frequently Asked Questions ==
+
+= What can I use Events Manager for? =
+Events Manager is built to handle a wide range of use cases, including:
+
+- Managing events, meetups, workshops and webinars
+- Scheduling appointments and recurring events
+- Planning and promoting conferences or festivals
+- Handling event registration and ticketing
+- Accepting bookings with optional payments
+- Creating a public event calendar for your website visitors
 
 See our [FAQ](http://wp-events-plugin.com/documentation/faq/) page for helps with Events Manager - Calendar, Bookings, Tickets, and more!
 
