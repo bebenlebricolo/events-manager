@@ -9,7 +9,7 @@ Stable tag: 7.2.2.1
 Requires PHP: 7.0
 License: GPLv2
 
-Fully featured events calendar, booking registration, appointments, recurring events, locations management, Google Maps
+Events calendar with bookings, scheduling, appointments, event registration, tickets, recurring events, and venue management.
 
 == Description ==
 
@@ -154,8 +154,9 @@ Events Manager is built to handle a wide range of use cases, including:
 - Managing events, meetups, workshops and webinars
 - Scheduling appointments and recurring events
 - Planning and promoting conferences or festivals
-- Handling event registration and ticketing
+- Handling event registration, RSVP, ticketing and ticket sales
 - Accepting bookings with optional payments
+- Managing venues and multiple event locations
 - Creating a public event calendar for your website visitors
 
 See our [FAQ](http://wp-events-plugin.com/documentation/faq/) page for helps with Events Manager - Calendar, Bookings, Tickets, and more!

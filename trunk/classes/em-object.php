@@ -1261,13 +1261,13 @@ class EM_Object {
 		if ( !empty(static::$field_shortcuts[$prop]) ) {
 			$property = static::$field_shortcuts[$prop];
 			if( !empty($this->fields[$property]['type']) && $this->fields[$property]['type'] == '%d' ){
-				$val = absint($val);
+				$val = (int) $val;
 			}
 			$this->{$property} = $val;
 		} elseif ( !empty($this->shortnames[$prop]) ) {
 			$property = $this->shortnames[$prop];
 			if( !empty($this->fields[$property]['type']) && $this->fields[$property]['type'] == '%d' ){
-				$val = absint($val);
+				$val = (int) $val;
 			}
 			$this->{$property} = $val;
 		} else {

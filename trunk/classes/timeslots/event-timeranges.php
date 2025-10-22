@@ -32,7 +32,7 @@ class Timeranges extends \EM\Timeranges {
 			$this->event = new EM_Event();
 		}
 		parent::__construct( $group_id );
-		$this->allow_timeranges = $this->event->get_option( 'dbem_event_timeranges', true );
+		$this->allow_timeranges = $this->event->get_option( 'dbem_event_timeranges_enabled', true );
 		$this->allow_edit = !$this->event->event_id;
 		$this->delete_action = $this->event->get_option('dbem_event_status_enabled') ? 'cancel' : 'delete';
 	}
@@ -143,7 +143,7 @@ class Timeranges extends \EM\Timeranges {
 			if ( !$event && $this->event->is_recurring( true ) && $has_timeslots) {
 				// just save the timeranges, recurring and repeating doesn't have timeslots themselves, only the recurrences
 				parent::save();
-			} elseif ( $has_timeslots ){
+			} elseif ( $has_timeslots && $this->validate() ){ // do not create event timeslots if timeranges are invalid
 				// we have more than one timerange or Timeslot here,
 				// save group id to timeranges, in case it's a new event
 				$this->group_id = 'event_' . $this->event->event_id;

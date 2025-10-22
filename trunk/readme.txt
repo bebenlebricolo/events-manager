@@ -9,7 +9,7 @@ Stable tag: 7.2.2.1
 Requires PHP: 7.0
 License: GPLv2
 
-Fully featured events calendar, booking registration, appointments, recurring events, locations management, Google Maps
+Events calendar with bookings, scheduling, appointments, event registration, tickets, recurring events, and venue management.
 
 == Description ==
 
@@ -154,8 +154,9 @@ Events Manager is built to handle a wide range of use cases, including:
 - Managing events, meetups, workshops and webinars
 - Scheduling appointments and recurring events
 - Planning and promoting conferences or festivals
-- Handling event registration and ticketing
+- Handling event registration, RSVP, ticketing and ticket sales
 - Accepting bookings with optional payments
+- Managing venues and multiple event locations
 - Creating a public event calendar for your website visitors
 
 See our [FAQ](http://wp-events-plugin.com/documentation/faq/) page for helps with Events Manager - Calendar, Bookings, Tickets, and more!
@@ -182,6 +183,24 @@ See our [FAQ](http://wp-events-plugin.com/documentation/faq/) page for helps wit
 18. Grid view for displaying your upcoming events at a glance
 
 == Changelog ==
+= 7.2.2.2 (dev)  =
+* Fixed multi-timerange and timeslot settings not being reflected in the event submission UI in some setups
+* Fixed incorrect default timerange UI data when adding an extra timerange to an event
+* FAQ update
+* Fixed booking cut-off time reverting to 12AM upon save for single events
+* Fixed styling issues for timeslot/range editor where trash icon may not appear on front-end for multiple time-ranges
+* Fixed repeating event ticket descriptions not showing on booking form if not overridden
+* Fixed saving a repeated event ticket being set to price 0 rather than repeating event parent ticket price
+* Fixed adding exclusion recurrence set not working when creating new event
+* Changed template approach for recurrence sets so recurrence set template is within a template element
+* Fixed validation errors in recurring events creating an extra blank recurrence set in UI after save attempt
+* Fixed timerange validation errors not saving elements of an event such as recurrence set data, timeranges etc. requiring re-setup during submission
+* Fixed event booking cut-off times not being properly saved for recurring events
+* Fixed recurring/repeating event booking cut-off relative dates (by day) not being properly saved
+* Fixed quick-action recurring/repeated links showing up for trashed posts
+* Fixed event status inconsistencies whilst trashing and untrashing repeated events
+* Fixed trashed event_status in EM_Event objects always reverting to 0 when loaded from DB
+
 = 7.2.2.1 =
 * Fixed blank admin pages for some server setups (possibly PHP version)
 

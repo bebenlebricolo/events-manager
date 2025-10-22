@@ -470,6 +470,8 @@ class EM_Ticket extends EM_Object {
 		$price = ( !empty($post['ticket_price']) ) ? wp_kses_data($post['ticket_price']):'';
 		if( preg_match('/^[0-9]*\.[0-9]+$/', $price) || preg_match('/^[0-9]+$/', $price) ){
 			$this->ticket_price = (float) $price;
+		} elseif ( $price === '' && $this->ticket_parent ) {
+			$this->ticket_price = null;
 		}else{
 			$this->ticket_price = (float) str_replace( array( em_get_option('dbem_bookings_currency_thousands_sep'), em_get_option('dbem_bookings_currency_decimal_point') ), array('','.'), $price );
 		}
@@ -497,7 +499,7 @@ class EM_Ticket extends EM_Object {
 		}
 		if ( !empty($post['ticket_required']) && $post['ticket_required'] !== 'default' ) {
 		    $this->ticket_required = 1;
-		} elseif ( $post['ticket_required'] === 'default' && $this->ticket_parent ) {
+		} elseif ( ($post['ticket_required'] ?? 'default') === 'default' && $this->ticket_parent ) {
 		    $this->ticket_required = null;
 		} else {
 		    $this->ticket_required = 0;

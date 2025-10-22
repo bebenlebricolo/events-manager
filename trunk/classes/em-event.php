@@ -255,6 +255,7 @@ class EM_Event extends EM_Object{
 		'event_location_type' => array( 'type'=>'%s', 'null'=>true ),
 		'recurrence_id' => array( 'name'=>'recurrence_id', 'type'=>'%d', 'null'=>true ),
 		'recurrence_set_id' => array( 'name'=>'recurrence_set_id', 'type'=>'%d'),
+		'recurrence_rsvp_days'  =>  array(  'name'=>'recurrence_rsvp_days',  'type'=>'%d',  'null'=>true  ),  //days  before  or  after  start  date  to  generat  bookings  cut-off  date
 		'event_status' => array( 'name'=>'status', 'type'=>'%d', 'null'=>true ),
 		'event_active_status' => array( 'name'=>'active_status', 'type'=>'%d', 'null'=>true ),
 		'event_private' => array( 'name'=>'private', 'type'=>'%d', 'null'=>true ),
@@ -971,6 +972,7 @@ class EM_Event extends EM_Object{
 		}
 		//Dates and Times
 		$this->event_start = $this->event_end = null;
+		$times_array = ['event_rsvp_time'];
 		if ( $this->is_recurring( true ) ) {
 			$this->get_recurrence_sets()->get_post();
 			// get the primary recurrence dates/times for now, we will save the definitive range during the save process.
@@ -996,10 +998,8 @@ class EM_Event extends EM_Object{
 			$this->event_start_date = ( !empty($_POST['event_start_date']) ) ? wp_kses_data($_POST['event_start_date']) : null;
 			$this->event_end_date = ( !empty($_POST['event_end_date']) ) ? wp_kses_data($_POST['event_end_date']) : $this->event_start_date;
 			//Sort out time
-			$times_array = [];
 			if ( $this->get_timeranges()->get_post('event_timeranges') ) {
 				if ( $this->get_timeranges()->is_all_day() ) {
-					$times_array = array('event_rsvp_time');
 					$this->event_all_day = true;
 					$this->event_start_time = '00:00:00';
 					$this->event_end_time = '23:59:59';
@@ -1008,25 +1008,26 @@ class EM_Event extends EM_Object{
 					$this->event_end_time = $this->get_timeranges()->get_time_end();
 				}
 			}
-			foreach( $times_array as $timeName ){
-				$match = array();
-				if( !empty($_POST[$timeName]) && preg_match ( '/^([01]\d|[0-9]|2[0-3])(:([0-5]\d))? ?(AM|PM)?$/', $_POST[$timeName], $match ) ){
-					if( empty($match[3]) ) $match[3] = '00';
-					if( strlen($match[1]) == 1 ) $match[1] = '0'.$match[1];
-					if( !empty($match[4]) && $match[4] == 'PM' && $match[1] != 12 ){
-						$match[1] = 12+$match[1];
-					}elseif( !empty($match[4]) && $match[4] == 'AM' && $match[1] == 12 ){
-						$match[1] = '00';
-					}
-					$this->$timeName = $match[1].":".$match[3].":00";
-				}else{
-					$this->$timeName = ($timeName == 'event_start_time') ? "00:00:00":$this->event_start_time;
-				}
-			}
 			// set status, if supplied
 			if ( isset($_POST['event_active_status']) && array_key_exists( $_POST['event_active_status'], static::get_active_statuses() ) ) {
 				$this->previous_active_status = $this->event_active_status;
 				$this->event_active_status = absint($_POST['event_active_status']);
+			}
+		}
+		// Get times and make sure they are valid
+		foreach( $times_array as $timeName ){
+			$match = array();
+			if( !empty($_POST[$timeName]) && preg_match ( '/^([01]\d|[0-9]|2[0-3])(:([0-5]\d))? ?(AM|PM)?$/', $_POST[$timeName], $match ) ){
+				if( empty($match[3]) ) $match[3] = '00';
+				if( strlen($match[1]) == 1 ) $match[1] = '0'.$match[1];
+				if( !empty($match[4]) && $match[4] == 'PM' && $match[1] != 12 ){
+					$match[1] = 12+$match[1];
+				}elseif( !empty($match[4]) && $match[4] == 'AM' && $match[1] == 12 ){
+					$match[1] = '00';
+				}
+				$this->$timeName = $match[1].":".$match[3].":00";
+			}else{
+				$this->$timeName = ($timeName == 'event_start_time') ? "00:00:00":$this->event_start_time;
 			}
 		}
 		//reset start and end objects so they are recreated with the new dates/times if and when needed
@@ -1082,7 +1083,7 @@ class EM_Event extends EM_Object{
 			$this->rsvp_end = null;
 			//RSVP cuttoff TIME is set up above where start/end times are as well
 			if( $this->get_option('dbem_bookings_tickets_single') && count($this->get_tickets()->tickets) == 1 ){
-				//single ticket mode will use the ticket end date/time as cut-off date/time
+				//single ticket mode will use the ticket end date/time as cut-off date/time, regular event cut-off fields are hidden in this UI mode
 		        $EM_Ticket = $this->get_tickets()->get_first();
 		        $this->event_rsvp_date = null;
 				if ( !empty($EM_Ticket->end) ) {
@@ -1098,9 +1099,9 @@ class EM_Event extends EM_Object{
 					}
 				}
 		    }else{
-				//if no rsvp cut-off date supplied, make it the event start date
+				// if no rsvp cut-off date supplied, make it the event start date
 				$this->event_rsvp_date = ( !empty($_POST['event_rsvp_date']) ) ? wp_kses_data($_POST['event_rsvp_date']) : $this->event_start_date;
-				//if no specificed time, default to event start time
+				// if no specificed time, default to event start time
 				if ( empty($_POST['event_rsvp_time']) ) $this->event_rsvp_time = $this->event_start_time;
 		    }
 		    //reset EM_DateTime object
@@ -1109,6 +1110,31 @@ class EM_Event extends EM_Object{
 			$this->event_rsvp_spaces = ( isset($_POST['event_rsvp_spaces']) ) ? absint($_POST['event_rsvp_spaces']):0;
 			// if recurring we save booking data to recurrences too
 			if ( $this->is_recurring( true ) ) {
+				//recurring events may have a cut-off date x days before or after the recurrence start dates, recurrence cut-off dates are calculated in recurrence sets according to these settings
+				$this->recurrence_rsvp_days = null;
+				if( get_option('dbem_bookings_tickets_single') && count($this->get_tickets()->tickets) == 1 ){
+					//if in single ticket mode then ticket cut-off date determines event cut-off date
+					$EM_Ticket = $this->get_tickets()->get_first();
+					if( !empty($EM_Ticket->ticket_meta['recurrences']) ){
+						$this->recurrence_rsvp_days = $EM_Ticket->ticket_meta['recurrences']['end_days'];
+						$this->event_rsvp_time = $EM_Ticket->ticket_meta['recurrences']['end_time'];
+					}
+				}else{
+					if( array_key_exists('recurrence_rsvp_days', $_POST) ){
+						if( !empty($_POST['recurrence_rsvp_days_when']) && $_POST['recurrence_rsvp_days_when'] == 'after' ){
+							$this->recurrence_rsvp_days = absint($_POST['recurrence_rsvp_days']);
+						}else{ //by default the start date is the point of reference
+							$this->recurrence_rsvp_days = absint($_POST['recurrence_rsvp_days']) * -1;
+						}
+					}
+				}
+				//create timestamps and set rsvp date/time for a normal event
+				if( !is_numeric($this->recurrence_rsvp_days) ){
+					//falback in case nothing gets set for rsvp cut-off
+					$this->event_rsvp_date = $this->event_rsvp_time = $this->rsvp_end = null;
+				}else{
+					$this->event_rsvp_date = $this->start()->copy()->modify($this->recurrence_rsvp_days.' days')->getDate();
+				}
 				$this->get_recurrence_sets()->get_post_bookings();
 			}
 		}
@@ -1909,7 +1935,6 @@ class EM_Event extends EM_Object{
 		if ( !$this->timeslots ) {
 			$group_id = 'event_' . $this->event_id;
 			$this->timeslots = new Timeranges( $group_id, $this );
-			$this->timeslots->allow_timeranges = $this->get_option('dbem_event_timeranges_enabled');
 		}
 		return apply_filters('get_timeranges', $this->timeslots, $this);
 	}
