@@ -183,7 +183,7 @@ See our [FAQ](http://wp-events-plugin.com/documentation/faq/) page for helps wit
 18. Grid view for displaying your upcoming events at a glance
 
 == Changelog ==
-= 7.2.2.2 (dev)  =
+= 7.2.2.3 (dev)  =
 * Fixed multi-timerange and timeslot settings not being reflected in the event submission UI in some setups
 * Fixed incorrect default timerange UI data when adding an extra timerange to an event
 * FAQ update
@@ -200,6 +200,10 @@ See our [FAQ](http://wp-events-plugin.com/documentation/faq/) page for helps wit
 * Fixed quick-action recurring/repeated links showing up for trashed posts
 * Fixed event status inconsistencies whilst trashing and untrashing repeated events
 * Fixed trashed event_status in EM_Event objects always reverting to 0 when loaded from DB
+* Fixed inability to unmark an event as all-day once clicked/saved for first time
+* Fixed calendar month formatting option not reflected in calendar
+* Fixed booking form for timeslots showing the time picker if the event is closed to bookings
+* Fixed repeating events template showing in the events list
 
 = 7.2.2.1 =
 * Fixed blank admin pages for some server setups (possibly PHP version)

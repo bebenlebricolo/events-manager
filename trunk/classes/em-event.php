@@ -1004,6 +1004,7 @@ class EM_Event extends EM_Object{
 					$this->event_start_time = '00:00:00';
 					$this->event_end_time = '23:59:59';
 				}else{
+					$this->event_all_day = false;
 					$this->event_start_time = $this->get_timeranges()->get_time_start();
 					$this->event_end_time = $this->get_timeranges()->get_time_end();
 				}

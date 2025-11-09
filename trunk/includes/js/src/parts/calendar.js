@@ -128,8 +128,8 @@ jQuery(document).ready( function($){
 					plugins: [
 						new monthSelectPlugin({
 							shorthand: true, //defaults to false
-							dateFormat: "F Y", //defaults to "F Y"
-							altFormat: "F Y", //defaults to "F Y"
+							dateFormat: EM?.calendar?.month_format || 'F Y',
+							altFormat: EM?.calendar?.month_format || 'F Y',
 						})
 					],
 					onChange: function(selectedDates, dateStr, instance) {

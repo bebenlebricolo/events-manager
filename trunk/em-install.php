@@ -1888,7 +1888,7 @@ function em_upgrade_current_installation(){
 				// Update event_type based on recurrence field
 				$wpdb->query("UPDATE " . EM_EVENTS_TABLE . " SET event_type = 
 		                CASE 
-		                    WHEN event_type IS NOT NULL AND event_type != 'event' THEN event_type
+		                    WHEN event_type IS NOT NULL AND event_type != 'single' THEN event_type
 		                    WHEN recurrence = 1 THEN 'repeating' 
 		                    WHEN recurrence_id IS NOT NULL AND recurrence != 1 THEN 'recurrence' 
 		                    ELSE 'single'
@@ -1961,6 +1961,13 @@ function em_upgrade_current_installation(){
 			$url = 'https://wp-events-plugin.com/blog/2025/09/25/events-manager-7-2-and-pro-3-7-2/';
 			$message = 'Events Manager 7.2 introduces timeslots! Enable this in <a href="'. EM_ADMIN_URL .'&amp;page=events-manager-options#general+general' .'"><em>Events > Settings > General Options</em></a>. <a href="'. $url .'">Learn more</a>';
 			EM_Admin_Notices::add(new EM_Admin_Notice(array( 'name' => 'v-update', 'who' => 'admin', 'what' => 'success', 'where' => 'all', 'message' => $message )), is_multisite());
+		}
+		if ( version_compare( $current_version, '7.2.2.3', '<' ) && version_compare( $current_version, '7', '>' ) ) {
+			// Update event_type based on recurrence field
+			$wpdb->query("UPDATE " . EM_EVENTS_TABLE . " SET event_type = 'repeating' WHERE recurrence = 1 AND recurrence_set_id IS NULL AND event_type = 'single'");
+			if ( $wpdb->rows_affected > 0 ) {
+				$wpdb->query("UPDATE {$wpdb->postmeta} SET meta_value = 'repeating' WHERE meta_key = '_event_type' AND post_id IN ( SELECT post_id FROM " . EM_EVENTS_TABLE . " WHERE event_type = 'repeating')");
+			}
 		}
 		$pro_update = function() {
 			if ( defined('EMP_VERSION') && version_compare( EMP_VERSION, '3.7.2', '<' ) ) {
