@@ -1,8 +1,0 @@
-form .event-form-bookings {
-	&:has( input.event_rsvp:not(:checked) ) {
-		#event-rsvp-options, .event-rsvp-options {
-			display: none;
-			visibility: hidden;
-		}
-	}
-}
