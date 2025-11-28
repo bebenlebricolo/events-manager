@@ -1,7 +1,5 @@
 # Events Manager Github *fork* -> don't expect any future changes
-_______
-⚠️ **IMPORTANT** ⚠️
-_______
+<p style="text-align:center;"><span style="font-weight:bold; font-size:300%">⚠️ IMPORTANT ⚠️</span></p>
 
 This repository **is an (unmaintained) fork** of the original SVN versioned [events manager wordpress plugin (svn)](https://plugins.svn.wordpress.org/events-manager/).
 The purpose of this forked repo was to provide a snapshot with a somewhat complete history, up until revision `= 7.2.2.1 =` (see the original readme.txt file: [docs/original-readme.txt](docs/original-readme.txt))
